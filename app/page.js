@@ -43,7 +43,7 @@ function loadGoogleMaps(apiKey) {
 
     const script = document.createElement('script');
     script.id = 'google-maps-script';
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&v=weekly&loading=async`;
+script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&v=weekly&loading=async&libraries=places`;
     script.async = true;
     script.defer = true;
     script.onload = () => window.google?.maps?.importLibrary
