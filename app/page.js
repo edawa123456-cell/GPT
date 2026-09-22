@@ -26,27 +26,112 @@ function isAfterHours(dateValue, timeValue) {
   return day === 0 || minutes < open || minutes >= close;
 }
 
-function loadGooglePlaces(apiKey) {
+function loadGoogleMaps(apiKey) {
   return new Promise((resolve, reject) => {
     if (!apiKey) return reject(new Error('Missing Google Maps browser key'));
-    if (window.google?.maps?.places) return resolve(window.google);
+    if (window.google?.maps?.importLibrary) return resolve(window.google);
 
     const existing = document.getElementById('google-maps-script');
     if (existing) {
-      existing.addEventListener('load', () => resolve(window.google));
-      existing.addEventListener('error', reject);
+      const done = () => window.google?.maps?.importLibrary
+        ? resolve(window.google)
+        : reject(new Error('Google Maps loaded, but the Maps JavaScript API is unavailable.'));
+      existing.addEventListener('load', done, { once: true });
+      existing.addEventListener('error', () => reject(new Error('Google Maps JavaScript failed to load.')), { once: true });
       return;
     }
 
     const script = document.createElement('script');
     script.id = 'google-maps-script';
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&v=weekly&loading=async`;
     script.async = true;
     script.defer = true;
-    script.onload = () => resolve(window.google);
-    script.onerror = reject;
+    script.onload = () => window.google?.maps?.importLibrary
+      ? resolve(window.google)
+      : reject(new Error('Google Maps loaded, but the Maps JavaScript API is unavailable.'));
+    script.onerror = () => reject(new Error('Google Maps JavaScript failed to load. Check the browser API key restrictions.'));
     document.head.appendChild(script);
   });
+}
+
+function AddressInput({ label, placeholder, value, onChange, placesReady, onPlacesError }) {
+  const [suggestions, setSuggestions] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [sessionToken, setSessionToken] = useState(null);
+  const requestId = useRef(0);
+
+  useEffect(() => {
+    if (!placesReady || value.trim().length < 3) {
+      setSuggestions([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      const id = ++requestId.current;
+      try {
+        const { AutocompleteSuggestion, AutocompleteSessionToken } = await window.google.maps.importLibrary('places');
+        let token = sessionToken;
+        if (!token) {
+          token = new AutocompleteSessionToken();
+          setSessionToken(token);
+        }
+        const { suggestions: results = [] } = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
+          input: value,
+          includedRegionCodes: ['us'],
+          sessionToken: token,
+        });
+        if (id !== requestId.current) return;
+        const items = results
+          .map((item) => item.placePrediction)
+          .filter(Boolean)
+          .slice(0, 6)
+          .map((prediction) => ({
+            text: prediction.text?.toString?.() || '',
+            prediction,
+          }))
+          .filter((item) => item.text);
+        setSuggestions(items);
+        setOpen(items.length > 0);
+      } catch (error) {
+        setSuggestions([]);
+        setOpen(false);
+        onPlacesError(error?.message || 'Google address suggestions could not load.');
+      }
+    }, 250);
+
+    return () => clearTimeout(timer);
+  }, [value, placesReady]);
+
+  function choose(item) {
+    onChange(item.text);
+    setSuggestions([]);
+    setOpen(false);
+    setSessionToken(null);
+  }
+
+  return (
+    <div className="addressField">
+      <label>{label}</label>
+      <input
+        value={value}
+        onChange={(e) => { onChange(e.target.value); setOpen(true); }}
+        onFocus={() => suggestions.length && setOpen(true)}
+        onBlur={() => setTimeout(() => setOpen(false), 150)}
+        placeholder={placeholder}
+        autoComplete="off"
+      />
+      {open && suggestions.length > 0 && (
+        <div className="addressSuggestions" role="listbox">
+          {suggestions.map((item, index) => (
+            <button key={`${item.text}-${index}`} type="button" className="addressSuggestion" onMouseDown={(e) => e.preventDefault()} onClick={() => choose(item)}>
+              <span className="pin">⌖</span><span>{item.text}</span>
+            </button>
+          ))}
+          <div className="googleAttribution">Powered by Google</div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function Home() {
@@ -63,45 +148,26 @@ export default function Home() {
   const [showQuote, setShowQuote] = useState(false);
   const [booked, setBooked] = useState(false);
 
-  const pickupRef = useRef(null);
-  const dropoffRef = useRef(null);
+  const [placesReady, setPlacesReady] = useState(false);
+  const [placesError, setPlacesError] = useState('');
 
   useEffect(() => {
     const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-    if (!key) return;
+    if (!key) {
+      setPlacesError('Address suggestions are not configured yet.');
+      return;
+    }
 
-    let pickupAutocomplete;
-    let dropoffAutocomplete;
-
-    loadGooglePlaces(key).then(() => {
-      if (!pickupRef.current || !dropoffRef.current) return;
-      pickupAutocomplete = new window.google.maps.places.Autocomplete(pickupRef.current, {
-        fields: ['formatted_address', 'name'],
-        componentRestrictions: { country: 'us' },
-        types: ['address']
+    loadGoogleMaps(key)
+      .then(async () => {
+        await window.google.maps.importLibrary('places');
+        setPlacesReady(true);
+        setPlacesError('');
+      })
+      .catch((error) => {
+        setPlacesReady(false);
+        setPlacesError(error?.message || 'Google address suggestions could not load.');
       });
-      dropoffAutocomplete = new window.google.maps.places.Autocomplete(dropoffRef.current, {
-        fields: ['formatted_address', 'name'],
-        componentRestrictions: { country: 'us' },
-        types: ['address']
-      });
-
-      pickupAutocomplete.addListener('place_changed', () => {
-        const place = pickupAutocomplete.getPlace();
-        const value = place.formatted_address || place.name || pickupRef.current.value;
-        setPickup(value);
-        setRoute(null);
-        setShowQuote(false);
-      });
-
-      dropoffAutocomplete.addListener('place_changed', () => {
-        const place = dropoffAutocomplete.getPlace();
-        const value = place.formatted_address || place.name || dropoffRef.current.value;
-        setDropoff(value);
-        setRoute(null);
-        setShowQuote(false);
-      });
-    }).catch(() => {});
   }, []);
 
   const afterHours = useMemo(() => {
@@ -180,11 +246,10 @@ export default function Home() {
             <form onSubmit={getQuote}>
               <div className="stepTitle">Get your towing price</div>
 
-              <label>Pickup location</label>
-              <input ref={pickupRef} value={pickup} onChange={e => { setPickup(e.target.value); setRoute(null); setShowQuote(false); }} placeholder="Start typing the pickup address" autoComplete="off" />
+              <AddressInput label="Pickup location" placeholder="Start typing the pickup address" value={pickup} placesReady={placesReady} onPlacesError={setPlacesError} onChange={(value) => { setPickup(value); setRoute(null); setShowQuote(false); }} />
 
-              <label>Drop-off location</label>
-              <input ref={dropoffRef} value={dropoff} onChange={e => { setDropoff(e.target.value); setRoute(null); setShowQuote(false); }} placeholder="Start typing the destination" autoComplete="off" />
+              <AddressInput label="Drop-off location" placeholder="Start typing the destination" value={dropoff} placesReady={placesReady} onPlacesError={setPlacesError} onChange={(value) => { setDropoff(value); setRoute(null); setShowQuote(false); }} />
+              {placesError && <div className="placesNotice">Address suggestions: {placesError}</div>}
 
               <div className="twoCol">
                 <div>
