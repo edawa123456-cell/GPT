@@ -30,9 +30,7 @@ function isAfterHours(dateValue, timeValue) {
   return day === 0 || minutes < open || minutes >= close;
 }
 
-/* -------------------------------------------------------
-   GOOGLE MAPS LOADER
-------------------------------------------------------- */
+/* GOOGLE MAPS LOADER */
 
 let googleMapsPromise = null;
 
@@ -107,9 +105,7 @@ function loadGoogleMaps(apiKey) {
   return googleMapsPromise;
 }
 
-/* -------------------------------------------------------
-   ADDRESS AUTOCOMPLETE
-------------------------------------------------------- */
+/* ADDRESS AUTOCOMPLETE */
 
 function AddressInput({
   label,
@@ -125,7 +121,19 @@ function AddressInput({
 
   const requestId = useRef(0);
 
+  // IMPORTANT:
+  // Prevents the selected full address from immediately
+  // triggering another autocomplete search.
+  const skipNextSearch = useRef(false);
+
   useEffect(() => {
+    if (skipNextSearch.current) {
+      skipNextSearch.current = false;
+      setSuggestions([]);
+      setOpen(false);
+      return;
+    }
+
     if (!placesReady || value.trim().length < 3) {
       setSuggestions([]);
       setOpen(false);
@@ -205,11 +213,18 @@ function AddressInput({
   }, [value, placesReady, sessionToken, onPlacesError]);
 
   function choose(item) {
-    onChange(item.text);
+    // Cancel any outstanding autocomplete response.
+    requestId.current += 1;
+
+    // The next value change came from selecting a Google
+    // suggestion, so don't search that completed address again.
+    skipNextSearch.current = true;
 
     setSuggestions([]);
     setOpen(false);
     setSessionToken(null);
+
+    onChange(item.text);
   }
 
   return (
@@ -261,9 +276,7 @@ function AddressInput({
   );
 }
 
-/* -------------------------------------------------------
-   MAIN PAGE
-------------------------------------------------------- */
+/* MAIN PAGE */
 
 export default function Home() {
   const [pickup, setPickup] = useState('');
@@ -285,10 +298,6 @@ export default function Home() {
 
   const [placesReady, setPlacesReady] = useState(false);
   const [placesError, setPlacesError] = useState('');
-
-  /* -------------------------------------------------------
-     START GOOGLE MAPS
-  ------------------------------------------------------- */
 
   useEffect(() => {
     let active = true;
@@ -338,10 +347,6 @@ export default function Home() {
     };
   }, []);
 
-  /* -------------------------------------------------------
-     AFTER HOURS
-  ------------------------------------------------------- */
-
   const afterHours = useMemo(() => {
     if (timing === 'Schedule for later') {
       return isAfterHours(
@@ -351,9 +356,7 @@ export default function Home() {
     }
 
     const now = new Date();
-
     const day = now.getDay();
-
     const mins =
       now.getHours() * 60 +
       now.getMinutes();
@@ -368,10 +371,6 @@ export default function Home() {
     scheduledDate,
     scheduledTime,
   ]);
-
-  /* -------------------------------------------------------
-     PRICE
-  ------------------------------------------------------- */
 
   const quote = useMemo(() => {
     if (!route) return null;
@@ -409,10 +408,6 @@ export default function Home() {
     rolls,
     afterHours,
   ]);
-
-  /* -------------------------------------------------------
-     GET ROUTE + PRICE
-  ------------------------------------------------------- */
 
   async function getQuote(e) {
     e.preventDefault();
@@ -486,10 +481,6 @@ export default function Home() {
     }
   }
 
-  /* -------------------------------------------------------
-     PAGE
-  ------------------------------------------------------- */
-
   return (
     <main>
       <header className="nav">
@@ -513,7 +504,6 @@ export default function Home() {
 
       <section className="hero">
         <div className="heroCopy">
-
           <div className="eyebrow">
             TOWING, WITHOUT THE PHONE CALL
           </div>
@@ -534,10 +524,8 @@ export default function Home() {
         </div>
 
         <div className="bookingCard">
-
           {!booked ? (
             <form onSubmit={getQuote}>
-
               <div className="stepTitle">
                 Get your towing price
               </div>
@@ -576,18 +564,13 @@ export default function Home() {
               )}
 
               <div className="twoCol">
-
                 <div>
-                  <label>
-                    Vehicle type
-                  </label>
+                  <label>Vehicle type</label>
 
                   <select
                     value={vehicle}
                     onChange={(e) =>
-                      setVehicle(
-                        e.target.value
-                      )
+                      setVehicle(e.target.value)
                     }
                   >
                     <option>Sedan</option>
@@ -597,23 +580,18 @@ export default function Home() {
                 </div>
 
                 <div>
-                  <label>
-                    Does it roll?
-                  </label>
+                  <label>Does it roll?</label>
 
                   <select
                     value={rolls}
                     onChange={(e) =>
-                      setRolls(
-                        e.target.value
-                      )
+                      setRolls(e.target.value)
                     }
                   >
                     <option>Yes</option>
                     <option>No</option>
                   </select>
                 </div>
-
               </div>
 
               <label>When?</label>
@@ -621,9 +599,7 @@ export default function Home() {
               <select
                 value={timing}
                 onChange={(e) =>
-                  setTiming(
-                    e.target.value
-                  )
+                  setTiming(e.target.value)
                 }
               >
                 <option>ASAP</option>
@@ -635,7 +611,6 @@ export default function Home() {
               {timing ===
                 'Schedule for later' && (
                 <div className="twoCol scheduleRow">
-
                   <div>
                     <label>
                       Pickup date
@@ -643,9 +618,7 @@ export default function Home() {
 
                     <input
                       type="date"
-                      value={
-                        scheduledDate
-                      }
+                      value={scheduledDate}
                       onChange={(e) =>
                         setScheduledDate(
                           e.target.value
@@ -661,9 +634,7 @@ export default function Home() {
 
                     <input
                       type="time"
-                      value={
-                        scheduledTime
-                      }
+                      value={scheduledTime}
                       onChange={(e) =>
                         setScheduledTime(
                           e.target.value
@@ -671,7 +642,6 @@ export default function Home() {
                       }
                     />
                   </div>
-
                 </div>
               )}
 
@@ -694,29 +664,23 @@ export default function Home() {
               {showQuote &&
                 quote !== null && (
                   <div className="quoteArea">
-
                     <div className="routeInfo">
-
                       <span>
                         Driving distance:{' '}
                         <strong>
-                          {route.exactMiles}{' '}
-                          mi
+                          {route.exactMiles} mi
                         </strong>
                       </span>
 
                       <span>
                         Billed mileage:{' '}
                         <strong>
-                          {route.billedMiles}{' '}
-                          mi
+                          {route.billedMiles} mi
                         </strong>
                       </span>
-
                     </div>
 
                     <div className="quoteBox">
-
                       <div>
                         <div className="quoteLabel">
                           Your tow price
@@ -736,11 +700,9 @@ export default function Home() {
                       >
                         BOOK THIS TOW
                       </button>
-
                     </div>
 
                     <details className="breakdown">
-
                       <summary>
                         Price breakdown
                       </summary>
@@ -754,8 +716,8 @@ export default function Home() {
 
                       <div>
                         <span>
-                          {route.billedMiles}{' '}
-                          mi × ${PER_MILE}
+                          {route.billedMiles} mi × $
+                          {PER_MILE}
                         </span>
 
                         <strong>
@@ -770,8 +732,7 @@ export default function Home() {
                       ] > 0 && (
                         <div>
                           <span>
-                            {vehicle}{' '}
-                            surcharge
+                            {vehicle} surcharge
                           </span>
 
                           <strong>
@@ -824,9 +785,7 @@ export default function Home() {
                           ${MINIMUM_CHARGE}
                         </strong>
                       </div>
-
                     </details>
-
                   </div>
                 )}
 
@@ -839,12 +798,9 @@ export default function Home() {
                 Mileage is rounded up
                 to the next whole mile.
               </p>
-
             </form>
           ) : (
-
             <div className="confirmation">
-
               <div className="check">
                 ✓
               </div>
@@ -862,7 +818,6 @@ export default function Home() {
               </p>
 
               <div className="summary">
-
                 <div>
                   <span>Pickup</span>
                   <strong>
@@ -882,10 +837,8 @@ export default function Home() {
                 <div>
                   <span>Distance</span>
                   <strong>
-                    {route?.exactMiles}{' '}
-                    mi (
-                    {route?.billedMiles}{' '}
-                    billed)
+                    {route?.exactMiles} mi (
+                    {route?.billedMiles} billed)
                   </strong>
                 </div>
 
@@ -919,7 +872,6 @@ export default function Home() {
                     ${quote}
                   </strong>
                 </div>
-
               </div>
 
               <button
@@ -932,34 +884,25 @@ export default function Home() {
               >
                 START ANOTHER
               </button>
-
             </div>
           )}
-
         </div>
       </section>
 
       <section className="how">
-
         <div className="sectionKicker">
           HOW IT WORKS
         </div>
 
         <h2>
-          Book a tow in three simple
-          steps.
+          Book a tow in three simple steps.
         </h2>
 
         <div className="steps">
-
           <article>
-            <div className="num">
-              1
-            </div>
+            <div className="num">1</div>
 
-            <h3>
-              Enter locations
-            </h3>
+            <h3>Enter locations</h3>
 
             <p>
               Start typing and choose
@@ -969,13 +912,9 @@ export default function Home() {
           </article>
 
           <article>
-            <div className="num">
-              2
-            </div>
+            <div className="num">2</div>
 
-            <h3>
-              See your price
-            </h3>
+            <h3>See your price</h3>
 
             <p>
               We calculate the driving
@@ -985,13 +924,9 @@ export default function Home() {
           </article>
 
           <article>
-            <div className="num">
-              3
-            </div>
+            <div className="num">3</div>
 
-            <h3>
-              Request your tow
-            </h3>
+            <h3>Request your tow</h3>
 
             <p>
               Confirm online. Customer
@@ -999,7 +934,6 @@ export default function Home() {
               are the next connection.
             </p>
           </article>
-
         </div>
       </section>
 
@@ -1007,7 +941,6 @@ export default function Home() {
         © {new Date().getFullYear()}{' '}
         Tow Truck On Demand
       </footer>
-
     </main>
   );
 }
