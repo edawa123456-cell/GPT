@@ -120,10 +120,6 @@ function AddressInput({
   const [sessionToken, setSessionToken] = useState(null);
 
   const requestId = useRef(0);
-
-  // IMPORTANT:
-  // Prevents the selected full address from immediately
-  // triggering another autocomplete search.
   const skipNextSearch = useRef(false);
 
   useEffect(() => {
@@ -213,11 +209,7 @@ function AddressInput({
   }, [value, placesReady, sessionToken, onPlacesError]);
 
   function choose(item) {
-    // Cancel any outstanding autocomplete response.
     requestId.current += 1;
-
-    // The next value change came from selecting a Google
-    // suggestion, so don't search that completed address again.
     skipNextSearch.current = true;
 
     setSuggestions([]);
@@ -295,6 +287,11 @@ export default function Home() {
 
   const [showQuote, setShowQuote] = useState(false);
   const [booked, setBooked] = useState(false);
+  const [requestSubmitted, setRequestSubmitted] = useState(false);
+
+  const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [vehicleDetails, setVehicleDetails] = useState('');
 
   const [placesReady, setPlacesReady] = useState(false);
   const [placesError, setPlacesError] = useState('');
@@ -357,6 +354,7 @@ export default function Home() {
 
     const now = new Date();
     const day = now.getDay();
+
     const mins =
       now.getHours() * 60 +
       now.getMinutes();
@@ -414,6 +412,7 @@ export default function Home() {
 
     setRouteError('');
     setBooked(false);
+    setRequestSubmitted(false);
     setShowQuote(false);
 
     if (
@@ -504,6 +503,7 @@ export default function Home() {
 
       <section className="hero">
         <div className="heroCopy">
+
           <div className="eyebrow">
             TOWING, WITHOUT THE PHONE CALL
           </div>
@@ -524,8 +524,10 @@ export default function Home() {
         </div>
 
         <div className="bookingCard">
+
           {!booked ? (
             <form onSubmit={getQuote}>
+
               <div className="stepTitle">
                 Get your towing price
               </div>
@@ -564,13 +566,18 @@ export default function Home() {
               )}
 
               <div className="twoCol">
+
                 <div>
-                  <label>Vehicle type</label>
+                  <label>
+                    Vehicle type
+                  </label>
 
                   <select
                     value={vehicle}
                     onChange={(e) =>
-                      setVehicle(e.target.value)
+                      setVehicle(
+                        e.target.value
+                      )
                     }
                   >
                     <option>Sedan</option>
@@ -580,18 +587,23 @@ export default function Home() {
                 </div>
 
                 <div>
-                  <label>Does it roll?</label>
+                  <label>
+                    Does it roll?
+                  </label>
 
                   <select
                     value={rolls}
                     onChange={(e) =>
-                      setRolls(e.target.value)
+                      setRolls(
+                        e.target.value
+                      )
                     }
                   >
                     <option>Yes</option>
                     <option>No</option>
                   </select>
                 </div>
+
               </div>
 
               <label>When?</label>
@@ -599,7 +611,9 @@ export default function Home() {
               <select
                 value={timing}
                 onChange={(e) =>
-                  setTiming(e.target.value)
+                  setTiming(
+                    e.target.value
+                  )
                 }
               >
                 <option>ASAP</option>
@@ -611,6 +625,7 @@ export default function Home() {
               {timing ===
                 'Schedule for later' && (
                 <div className="twoCol scheduleRow">
+
                   <div>
                     <label>
                       Pickup date
@@ -618,7 +633,9 @@ export default function Home() {
 
                     <input
                       type="date"
-                      value={scheduledDate}
+                      value={
+                        scheduledDate
+                      }
                       onChange={(e) =>
                         setScheduledDate(
                           e.target.value
@@ -634,7 +651,9 @@ export default function Home() {
 
                     <input
                       type="time"
-                      value={scheduledTime}
+                      value={
+                        scheduledTime
+                      }
                       onChange={(e) =>
                         setScheduledTime(
                           e.target.value
@@ -642,6 +661,7 @@ export default function Home() {
                       }
                     />
                   </div>
+
                 </div>
               )}
 
@@ -664,23 +684,29 @@ export default function Home() {
               {showQuote &&
                 quote !== null && (
                   <div className="quoteArea">
+
                     <div className="routeInfo">
+
                       <span>
                         Driving distance:{' '}
                         <strong>
-                          {route.exactMiles} mi
+                          {route.exactMiles}{' '}
+                          mi
                         </strong>
                       </span>
 
                       <span>
                         Billed mileage:{' '}
                         <strong>
-                          {route.billedMiles} mi
+                          {route.billedMiles}{' '}
+                          mi
                         </strong>
                       </span>
+
                     </div>
 
                     <div className="quoteBox">
+
                       <div>
                         <div className="quoteLabel">
                           Your tow price
@@ -694,15 +720,18 @@ export default function Home() {
                       <button
                         className="bookButton"
                         type="button"
-                        onClick={() =>
-                          setBooked(true)
-                        }
+                        onClick={() => {
+                          setRequestSubmitted(false);
+                          setBooked(true);
+                        }}
                       >
                         BOOK THIS TOW
                       </button>
+
                     </div>
 
                     <details className="breakdown">
+
                       <summary>
                         Price breakdown
                       </summary>
@@ -716,8 +745,8 @@ export default function Home() {
 
                       <div>
                         <span>
-                          {route.billedMiles} mi × $
-                          {PER_MILE}
+                          {route.billedMiles}{' '}
+                          mi × ${PER_MILE}
                         </span>
 
                         <strong>
@@ -732,7 +761,8 @@ export default function Home() {
                       ] > 0 && (
                         <div>
                           <span>
-                            {vehicle} surcharge
+                            {vehicle}{' '}
+                            surcharge
                           </span>
 
                           <strong>
@@ -785,7 +815,9 @@ export default function Home() {
                           ${MINIMUM_CHARGE}
                         </strong>
                       </div>
+
                     </details>
+
                   </div>
                 )}
 
@@ -798,26 +830,170 @@ export default function Home() {
                 Mileage is rounded up
                 to the next whole mile.
               </p>
+
             </form>
+          ) : !requestSubmitted ? (
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                setRequestSubmitted(true);
+              }}
+            >
+
+              <div className="stepTitle">
+                Almost done
+              </div>
+
+              <div className="quoteBox">
+                <div>
+                  <div className="quoteLabel">
+                    Your tow price
+                  </div>
+
+                  <div className="quotePrice">
+                    ${quote}
+                  </div>
+                </div>
+              </div>
+
+              <div className="summary">
+
+                <div>
+                  <span>Pickup</span>
+                  <strong>
+                    {pickup}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Destination</span>
+                  <strong>
+                    {dropoff}
+                  </strong>
+                </div>
+
+              </div>
+
+              <label>
+                Name
+              </label>
+
+              <input
+                type="text"
+                value={customerName}
+                onChange={(e) =>
+                  setCustomerName(
+                    e.target.value
+                  )
+                }
+                placeholder="Your name"
+                autoComplete="name"
+                required
+              />
+
+              <label>
+                Phone number
+              </label>
+
+              <input
+                type="tel"
+                value={customerPhone}
+                onChange={(e) =>
+                  setCustomerPhone(
+                    e.target.value
+                  )
+                }
+                placeholder="Your mobile number"
+                autoComplete="tel"
+                required
+              />
+
+              <label>
+                Vehicle make & model
+              </label>
+
+              <input
+                type="text"
+                value={vehicleDetails}
+                onChange={(e) =>
+                  setVehicleDetails(
+                    e.target.value
+                  )
+                }
+                placeholder="Example: Ford F-150"
+                required
+              />
+
+              <button
+                className="primary"
+                type="submit"
+              >
+                REQUEST MY TOW — ${quote}
+              </button>
+
+              <button
+                className="bookButton"
+                type="button"
+                onClick={() =>
+                  setBooked(false)
+                }
+              >
+                ← BACK TO QUOTE
+              </button>
+
+              <p className="finePrint">
+                We may call or text you
+                if we need more information
+                about the tow.
+              </p>
+
+            </form>
+
           ) : (
+
             <div className="confirmation">
+
               <div className="check">
                 ✓
               </div>
 
               <h2>
-                Tow request ready
+                Tow request received
               </h2>
 
               <p>
-                This is the next step
-                we will connect to the
-                customer information
-                and SMS booking
-                confirmation.
+                Your tow request has been
+                received. We may call or
+                text you if we need more
+                information.
               </p>
 
               <div className="summary">
+
+                <div>
+                  <span>Name</span>
+                  <strong>
+                    {customerName}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Phone</span>
+                  <strong>
+                    {customerPhone}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>
+                    Vehicle
+                  </span>
+                  <strong>
+                    {vehicleDetails}
+                  </strong>
+                </div>
+
                 <div>
                   <span>Pickup</span>
                   <strong>
@@ -837,13 +1013,17 @@ export default function Home() {
                 <div>
                   <span>Distance</span>
                   <strong>
-                    {route?.exactMiles} mi (
-                    {route?.billedMiles} billed)
+                    {route?.exactMiles}{' '}
+                    mi (
+                    {route?.billedMiles}{' '}
+                    billed)
                   </strong>
                 </div>
 
                 <div>
-                  <span>Vehicle</span>
+                  <span>
+                    Vehicle type
+                  </span>
                   <strong>
                     {vehicle}
                   </strong>
@@ -872,37 +1052,55 @@ export default function Home() {
                     ${quote}
                   </strong>
                 </div>
+
               </div>
 
               <button
                 className="primary"
                 onClick={() => {
                   setBooked(false);
+                  setRequestSubmitted(false);
                   setShowQuote(false);
                   setRoute(null);
+
+                  setPickup('');
+                  setDropoff('');
+
+                  setCustomerName('');
+                  setCustomerPhone('');
+                  setVehicleDetails('');
                 }}
               >
                 START ANOTHER
               </button>
+
             </div>
           )}
+
         </div>
       </section>
 
       <section className="how">
+
         <div className="sectionKicker">
           HOW IT WORKS
         </div>
 
         <h2>
-          Book a tow in three simple steps.
+          Book a tow in three simple
+          steps.
         </h2>
 
         <div className="steps">
-          <article>
-            <div className="num">1</div>
 
-            <h3>Enter locations</h3>
+          <article>
+            <div className="num">
+              1
+            </div>
+
+            <h3>
+              Enter locations
+            </h3>
 
             <p>
               Start typing and choose
@@ -912,9 +1110,13 @@ export default function Home() {
           </article>
 
           <article>
-            <div className="num">2</div>
+            <div className="num">
+              2
+            </div>
 
-            <h3>See your price</h3>
+            <h3>
+              See your price
+            </h3>
 
             <p>
               We calculate the driving
@@ -924,16 +1126,21 @@ export default function Home() {
           </article>
 
           <article>
-            <div className="num">3</div>
+            <div className="num">
+              3
+            </div>
 
-            <h3>Request your tow</h3>
+            <h3>
+              Request your tow
+            </h3>
 
             <p>
-              Confirm online. Customer
-              SMS and owner notifications
-              are the next connection.
+              Enter your contact
+              information and submit
+              your tow request.
             </p>
           </article>
+
         </div>
       </section>
 
@@ -941,6 +1148,7 @@ export default function Home() {
         © {new Date().getFullYear()}{' '}
         Tow Truck On Demand
       </footer>
+
     </main>
   );
 }
