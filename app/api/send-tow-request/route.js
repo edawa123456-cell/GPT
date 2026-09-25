@@ -1,100 +1,159 @@
+import { NextResponse } from "next/server";
+
 export async function POST(request) {
   try {
+    const body = await request.json();
+
     const {
-      name,
-      phone,
-      vehicle,
+      customerName,
+      customerPhone,
+      vehicleDetails,
       pickup,
       destination,
-      price,
       miles,
+      total,
+      date,
+      time,
       vehicleType,
-      rolls,
-      when,
-    } = await request.json();
+      nonRolling,
+      afterHours,
+    } = body;
 
-    if (!name || !phone || !vehicle || !pickup || !destination || !price) {
-      return Response.json(
-        { error: 'Missing required tow information.' },
-        { status: 400 }
-      );
-    }
-
-    const accountSid = process.env.TWILIO_ACCOUNT_SID;
-    const authToken = process.env.TWILIO_AUTH_TOKEN;
-    const fromNumber = process.env.TWILIO_FROM_NUMBER;
-    const toNumber = process.env.TOW_REQUEST_TO_NUMBER;
-
-    if (!accountSid || !authToken || !fromNumber || !toNumber) {
-      console.error('Missing Twilio environment variables.');
-
-      return Response.json(
-        { error: 'SMS service is not configured.' },
+    if (!process.env.RESEND_API_KEY) {
+      console.error("RESEND_API_KEY is missing");
+      return NextResponse.json(
+        { error: "Email service is not configured." },
         { status: 500 }
       );
     }
 
-    const message = [
-      'NEW TOW REQUEST',
-      '',
-      `Customer: ${name}`,
-      `Phone: ${phone}`,
-      `Vehicle: ${vehicle}`,
-      vehicleType ? `Type: ${vehicleType}` : null,
-      rolls ? `Rolls: ${rolls}` : null,
-      '',
-      `Pickup: ${pickup}`,
-      `Drop-off: ${destination}`,
-      miles ? `Distance: ${miles} miles` : null,
-      when ? `When: ${when}` : null,
-      '',
-      `QUOTE: $${price}`,
-    ]
-      .filter(Boolean)
-      .join('\n');
+    if (!process.env.TOW_REQUEST_EMAIL) {
+      console.error("TOW_REQUEST_EMAIL is missing");
+      return NextResponse.json(
+        { error: "Tow request email is not configured." },
+        { status: 500 }
+      );
+    }
 
-    const body = new URLSearchParams({
-      To: toNumber,
-      From: fromNumber,
-      Body: message,
+    const emailHtml = `
+      <div style="font-family: Arial, sans-serif; max-width: 650px; margin: auto;">
+        <h1 style="margin-bottom: 5px;">New Tow Request</h1>
+
+        <p style="font-size: 20px; font-weight: bold;">
+          Quote: $${total ?? "N/A"}
+        </p>
+
+        <hr />
+
+        <h2>Customer</h2>
+
+        <p>
+          <strong>Name:</strong>
+          ${customerName || "Not provided"}
+        </p>
+
+        <p>
+          <strong>Phone:</strong>
+          ${customerPhone || "Not provided"}
+        </p>
+
+        <h2>Vehicle</h2>
+
+        <p>
+          <strong>Vehicle:</strong>
+          ${vehicleDetails || "Not provided"}
+        </p>
+
+        <p>
+          <strong>Vehicle Type:</strong>
+          ${vehicleType || "Not provided"}
+        </p>
+
+        <p>
+          <strong>Non-Rolling:</strong>
+          ${nonRolling ? "Yes" : "No"}
+        </p>
+
+        <h2>Trip</h2>
+
+        <p>
+          <strong>Pickup:</strong><br />
+          ${pickup || "Not provided"}
+        </p>
+
+        <p>
+          <strong>Destination:</strong><br />
+          ${destination || "Not provided"}
+        </p>
+
+        <p>
+          <strong>Distance:</strong>
+          ${miles ?? "N/A"} miles
+        </p>
+
+        <h2>Requested Time</h2>
+
+        <p>
+          <strong>Date:</strong>
+          ${date || "Not provided"}
+        </p>
+
+        <p>
+          <strong>Time:</strong>
+          ${time || "Not provided"}
+        </p>
+
+        <p>
+          <strong>After Hours:</strong>
+          ${afterHours ? "Yes" : "No"}
+        </p>
+
+        <hr />
+
+        <p style="font-size: 13px; color: #666;">
+          Submitted through TowTruckOnDemand
+        </p>
+      </div>
+    `;
+
+    const resendResponse = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "TowTruckOnDemand <onboarding@resend.dev>",
+        to: [process.env.TOW_REQUEST_EMAIL],
+        subject: `New Tow Request - ${customerName || customerPhone || "Customer"}`,
+        html: emailHtml,
+      }),
     });
 
-    const credentials = Buffer.from(
-      `${accountSid}:${authToken}`
-    ).toString('base64');
+    const resendData = await resendResponse.json();
 
-    const twilioResponse = await fetch(
-      `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Basic ${credentials}`,
-          'Content-Type': 'application/x-www-form-urlencoded',
+    if (!resendResponse.ok) {
+      console.error("Resend error:", resendData);
+
+      return NextResponse.json(
+        {
+          error: "Unable to send tow notification.",
+          details: resendData,
         },
-        body: body.toString(),
-      }
-    );
-
-    const result = await twilioResponse.json();
-
-    if (!twilioResponse.ok) {
-      console.error('Twilio error:', result);
-
-      return Response.json(
-        { error: 'Unable to send tow notification.' },
         { status: 500 }
       );
     }
 
-    return Response.json({
+    return NextResponse.json({
       success: true,
-      messageSid: result.sid,
+      message: "Tow request sent successfully.",
+      emailId: resendData.id,
     });
   } catch (error) {
-    console.error('Tow request error:', error);
+    console.error("Tow request error:", error);
 
-    return Response.json(
-      { error: 'Unable to process tow request.' },
+    return NextResponse.json(
+      { error: "Unable to process tow request." },
       { status: 500 }
     );
   }
