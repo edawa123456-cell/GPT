@@ -288,6 +288,8 @@ export default function Home() {
   const [showQuote, setShowQuote] = useState(false);
   const [booked, setBooked] = useState(false);
   const [requestSubmitted, setRequestSubmitted] = useState(false);
+  const [sendingRequest, setSendingRequest] = useState(false);
+  const [requestError, setRequestError] = useState('');
 
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
@@ -477,6 +479,54 @@ export default function Home() {
       );
     } finally {
       setLoadingRoute(false);
+    }
+  }
+
+  async function submitTowRequest(e) {
+    e.preventDefault();
+    setRequestError('');
+    setSendingRequest(true);
+
+    try {
+      const response = await fetch('/api/send-tow-request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: customerName.trim(),
+          phone: customerPhone.trim(),
+          vehicle: vehicleDetails.trim(),
+          pickup,
+          destination: dropoff,
+          price: quote,
+          miles: route?.exactMiles,
+          vehicleType: vehicle,
+          rolls,
+          when:
+            timing === 'ASAP'
+              ? 'ASAP'
+              : `${scheduledDate} ${scheduledTime}`,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || 'Could not send your tow request.'
+        );
+      }
+
+      setRequestSubmitted(true);
+    } catch (error) {
+      console.error('Tow request submission error:', error);
+      setRequestError(
+        error?.message ||
+          'Could not send your tow request. Please try again.'
+      );
+    } finally {
+      setSendingRequest(false);
     }
   }
 
@@ -834,12 +884,7 @@ export default function Home() {
             </form>
           ) : !requestSubmitted ? (
 
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                setRequestSubmitted(true);
-              }}
-            >
+            <form onSubmit={submitTowRequest}>
 
               <div className="stepTitle">
                 Almost done
@@ -928,9 +973,18 @@ export default function Home() {
               <button
                 className="primary"
                 type="submit"
+                disabled={sendingRequest}
               >
-                REQUEST MY TOW — ${quote}
+                {sendingRequest
+                  ? 'SENDING REQUEST...'
+                  : `REQUEST MY TOW — $${quote}`}
               </button>
+
+              {requestError && (
+                <div className="errorBox">
+                  {requestError}
+                </div>
+              )}
 
               <button
                 className="bookButton"
