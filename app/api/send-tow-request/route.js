@@ -124,7 +124,7 @@ export async function POST(request) {
       },
       body: JSON.stringify({
         from: "TowTruckOnDemand <onboarding@resend.dev>",
-        to: [process.env.TOW_REQUEST_EMAIL],
+        to: ["edawa123456@gmail.com"],
         subject: `New Tow Request - ${customerName || customerPhone || "Customer"}`,
         html: emailHtml,
       }),
