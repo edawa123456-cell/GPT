@@ -533,16 +533,15 @@ total: quote,
   return (
     <main>
       <header className="nav">
-        <div className="brand">
-          <span className="brandTop">
-            TowTruck
-          </span>
+        <a href="/" className="brand">
+  <span className="brandTop">
+    TowTruck
+  </span>
 
-          <span className="brandBottom">
-            OnDemand
-          </span>
-        </div>
-
+  <span className="brandBottom">
+    OnDemand
+  </span>
+</a>
         <a
           className="callLink"
           href="tel:#"
