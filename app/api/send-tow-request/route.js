@@ -123,8 +123,8 @@ console.log("TOW REQUEST BODY:", body);
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "TowTruckOnDemand <onboarding@resend.dev>",
-        to: ["edawa123456@gmail.com"],
+       from: "TowTruckOnDemand <notifications@towtruckondemand.com>",
+to: [process.env.TOW_REQUEST_EMAIL],
         subject: `New Tow Request - ${customerName || customerPhone || "Customer"}`,
         html: emailHtml,
       }),
