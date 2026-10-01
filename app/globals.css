@@ -53,6 +53,10 @@
 }
 
 @media (max-width: 700px) {
+  .heroFleetDesktop {
+  display: none;
+}
+  
   .heroFleet {
     margin: 0 0 16px;
   }
