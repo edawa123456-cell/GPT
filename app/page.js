@@ -557,9 +557,9 @@ total: quote,
     alt="Local Tow Truck On Demand fleet"
   />
 </div>
-          <div className="eyebrow">
-            TOWING, WITHOUT THE PHONE CALL
-          </div>
+        <div className="eyebrow">
+  SERVING DFW & SURROUNDING AREAS
+</div>
 
           <h1>Need a tow?</h1>
 
