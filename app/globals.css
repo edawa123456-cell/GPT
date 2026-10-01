@@ -34,3 +34,27 @@
 .addressSuggestion .pin { color: #1477ff; font-weight: 800; }
 .googleAttribution { padding: 7px 12px; text-align: right; font-size: 11px; color: #6b7280; background: #fafafa; }
 .placesNotice { margin: -2px 0 10px; font-size: 12px; color: #b42318; }
+
+/* Fleet photo */
+.heroFleet {
+  width: 100%;
+  margin: 0 0 24px;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.15);
+}
+
+.heroFleet img {
+  display: block;
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+  object-position: center;
+}
+
+@media (max-width: 700px) {
+  .heroFleet img {
+    height: 190px;
+  }
+}
+
