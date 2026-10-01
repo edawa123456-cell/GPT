@@ -53,8 +53,28 @@
 }
 
 @media (max-width: 700px) {
-  .heroFleetDesktop {
+.heroFleetDesktop {
   display: none;
+}
+
+.hero {
+  margin-top: 4px;
+  gap: 20px;
+}
+
+.hero h1 {
+  font-size: 48px;
+  margin: 10px 0 14px;
+}
+
+.lede {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.45;
+}
+
+.trustRow {
+  margin-top: 22px;
 }
   
   .heroFleet {
