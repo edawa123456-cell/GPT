@@ -544,7 +544,7 @@ total: quote,
 </a>
         <a
           className="callLink"
-          href="tel:#"
+          href="tel:+12108062061"
         >
           Call us
         </a>
