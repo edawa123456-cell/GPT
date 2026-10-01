@@ -552,7 +552,12 @@ total: quote,
 
       <section className="hero">
         <div className="heroCopy">
-
+<div className="heroFleet">
+  <img
+    src="/tow-truck-fleet.png"
+    alt="Local Tow Truck On Demand fleet"
+  />
+</div>
           <div className="eyebrow">
             TOWING, WITHOUT THE PHONE CALL
           </div>
