@@ -558,8 +558,8 @@ total: quote,
   />
 </div>
         <div className="eyebrow">
-  SERVING DFW & SURROUNDING AREAS
-</div>
+SERVING DFW & SURROUNDING AREAS
+      </div>
 
           <h1>Need a tow?</h1>
 
