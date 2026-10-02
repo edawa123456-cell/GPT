@@ -517,7 +517,13 @@ total: quote,
           data.error || 'Could not send your tow request.'
         );
       }
-
+if (typeof window !== 'undefined' && window.gtag) {
+  window.gtag('event', 'conversion', {
+    send_to: 'AW-18487849737/r7DCCNP3jY0dEInm2o9E',
+    value: 1.0,
+    currency: 'USD',
+  });
+}
       setRequestSubmitted(true);
     } catch (error) {
       console.error('Tow request submission error:', error);
