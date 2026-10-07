@@ -92,4 +92,13 @@
   display: block;
   width: 190px;
   height: auto;
+  max-width: 100%;
+}
+
+.brand {
+  display: block;
+  width: 190px;
+  line-height: normal;
+  font-size: initial;
+  letter-spacing: normal;
 }
