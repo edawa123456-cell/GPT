@@ -17,6 +17,8 @@ console.log("TOW REQUEST BODY:", body);
       vehicleType,
       nonRolling,
       afterHours,
+            leadSource,
+
     } = body;
 
     if (!process.env.RESEND_API_KEY) {
@@ -108,7 +110,11 @@ console.log("TOW REQUEST BODY:", body);
           ${afterHours ? "Yes" : "No"}
         </p>
 
-        <hr />
+       <p>
+  <strong>Lead Source:</strong>
+  ${leadSource || "Direct"}
+</p>
+<hr />
 
         <p style="font-size: 13px; color: #666;">
           Submitted through TowTruckOnDemand
