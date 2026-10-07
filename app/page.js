@@ -560,14 +560,12 @@ if (typeof window !== 'undefined' && window.gtag) {
   return (
     <main>
       <header className="nav">
-        <a href="/" className="brand">
-  <span className="brandTop">
-    TowTruck
-  </span>
-
-  <span className="brandBottom">
-    OnDemand
-  </span>
+      <a href="/" className="brand">
+  <img
+    src="/towtruckondemand-logo.png"
+    alt="TowTruckOnDemand"
+    className="brandLogo"
+  />
 </a>
         <a
           className="callLink"
