@@ -1,7 +1,12 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-
+const REFERRAL_PARTNERS = {
+  'jo-towing': 'Jo Towing',
+  'xpress-towing': 'Xpress Towing',
+  'j-jasmine-towing': 'J-Jasmine Towing',
+  'jasmine-towing': 'Jasmine Towing',
+};
 const VEHICLE_SURCHARGE = {
   Sedan: 0,
   SUV: 15,
@@ -271,6 +276,7 @@ function AddressInput({
 /* MAIN PAGE */
 
 export default function Home() {
+  const [leadSource, setLeadSource] = useState('Direct');
   const [pickup, setPickup] = useState('');
   const [dropoff, setDropoff] = useState('');
 
@@ -297,7 +303,20 @@ export default function Home() {
 
   const [placesReady, setPlacesReady] = useState(false);
   const [placesError, setPlacesError] = useState('');
+useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  const ref = params.get('ref');
 
+  if (ref && REFERRAL_PARTNERS[ref]) {
+    setLeadSource(REFERRAL_PARTNERS[ref]);
+    localStorage.setItem('towReferralSource', REFERRAL_PARTNERS[ref]);
+  } else {
+    const savedSource = localStorage.getItem('towReferralSource');
+    if (savedSource) {
+      setLeadSource(savedSource);
+    }
+  }
+}, []);
   useEffect(() => {
     let active = true;
 
@@ -496,7 +515,9 @@ export default function Home() {
         body: JSON.stringify({
          customerName: customerName.trim(),
 customerPhone: customerPhone.trim(),
+   leadSource: leadSource,       
 vehicleDetails: vehicleDetails.trim(),
+          
 pickup,
 destination: dropoff,
 total: quote,
