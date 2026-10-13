@@ -26,6 +26,17 @@ if (!locationResponse.ok) {
 
 const locationData = await locationResponse.json();
 
+if (locationData.status !== 'OK') {
+  console.error('Pickup geocoding failed:', locationData.status, locationData.error_message);
+
+  return NextResponse.json(
+    {
+      error: 'We could not verify your pickup address right now. Please try again or call us.'
+    },
+    { status: 502 }
+  );
+}
+
 const pickupInTexas =
   locationData.status === 'OK' &&
   locationData.results?.some((result) =>
