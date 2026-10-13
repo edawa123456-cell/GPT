@@ -13,6 +13,38 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Pickup and drop-off are required.' }, { status: 400 });
     }
 
+const locationResponse = await fetch(
+  `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(origin)}&key=${apiKey}`
+);
+
+if (!locationResponse.ok) {
+  return NextResponse.json(
+    { error: 'Unable to verify pickup location. Please try again.' },
+    { status: 502 }
+  );
+}
+
+const locationData = await locationResponse.json();
+
+const pickupInTexas =
+  locationData.status === 'OK' &&
+  locationData.results?.some((result) =>
+    result.address_components?.some(
+      (component) =>
+        component.types.includes('administrative_area_level_1') &&
+        component.short_name === 'TX'
+    )
+  );
+
+if (!pickupInTexas) {
+  return NextResponse.json(
+    {
+      error: 'Sorry, we currently accept towing requests with pickup locations in Texas only.'
+    },
+    { status: 400 }
+  );
+}
+
     const response = await fetch('https://routes.googleapis.com/directions/v2:computeRoutes', {
       method: 'POST',
       headers: {
