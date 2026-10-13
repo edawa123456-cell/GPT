@@ -14,29 +14,39 @@ export async function POST(request) {
     }
 
 
-try {
-  const geoResponse = await fetch(
-    `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(origin)}&key=${apiKey}`
-  );
+    try {
+      const geoResponse = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(origin)}&key=${apiKey}`
+      );
 
-  const geoData = await geoResponse.json();
+      const geoData = await geoResponse.json();
 
-  const states = (geoData.results || []).map((result) =>
-    result.address_components?.find((component) =>
-      component.types.includes('administrative_area_level_1')
-    )?.short_name || 'UNKNOWN'
-  );
+      if (!geoResponse.ok || geoData.status !== 'OK' || !geoData.results?.length) {
+        return NextResponse.json(
+          { error: 'We could not verify your pickup address. Please try again or call us.' },
+          { status: 502 }
+        );
+      }
 
-  console.log('Pickup geocoding diagnostic:', {
-    httpStatus: geoResponse.status,
-    googleStatus: geoData.status,
-    googleError: geoData.error_message || null,
-    states
-  });
-} catch (error) {
-  console.error('Pickup geocoding diagnostic failed:', error.message);
-}
+      const pickupInTexas = geoData.results[0].address_components?.some(
+        (component) =>
+          component.types.includes('administrative_area_level_1') &&
+          component.short_name === 'TX'
+      );
 
+      if (!pickupInTexas) {
+        return NextResponse.json(
+          { error: 'Sorry, we currently accept towing requests with pickup locations in Texas only.' },
+          { status: 400 }
+        );
+      }
+    } catch (error) {
+      console.error('Pickup location verification failed:', error.message);
+      return NextResponse.json(
+        { error: 'Unable to verify your pickup location right now. Please try again or call us.' },
+        { status: 502 }
+      );
+    }
     const response = await fetch('https://routes.googleapis.com/directions/v2:computeRoutes', {
       method: 'POST',
       headers: {
