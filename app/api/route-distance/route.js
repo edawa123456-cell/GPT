@@ -14,6 +14,29 @@ export async function POST(request) {
     }
 
 
+try {
+  const geoResponse = await fetch(
+    `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(origin)}&key=${apiKey}`
+  );
+
+  const geoData = await geoResponse.json();
+
+  const states = (geoData.results || []).map((result) =>
+    result.address_components?.find((component) =>
+      component.types.includes('administrative_area_level_1')
+    )?.short_name || 'UNKNOWN'
+  );
+
+  console.log('Pickup geocoding diagnostic:', {
+    httpStatus: geoResponse.status,
+    googleStatus: geoData.status,
+    googleError: geoData.error_message || null,
+    states
+  });
+} catch (error) {
+  console.error('Pickup geocoding diagnostic failed:', error.message);
+}
+
     const response = await fetch('https://routes.googleapis.com/directions/v2:computeRoutes', {
       method: 'POST',
       headers: {
