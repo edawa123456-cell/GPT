@@ -1246,10 +1246,18 @@ SERVING DFW & SURROUNDING AREAS
         </div>
       </section>
 
-      <footer>
-        © {new Date().getFullYear()}{' '}
-        Tow Truck On Demand
-      </footer>
+    
+<footer>
+  <div>
+    © {new Date().getFullYear()} Tow Truck On Demand
+  </div>
+  <div style={{ marginTop: 10 }}>
+    <a href="/privacy-policy">Privacy Policy</a>
+    <span style={{ margin: "0 12px" }}>|</span>
+    <a href="/terms">Terms & Conditions</a>
+  </div>
+</footer>
+
 
     </main>
   );
