@@ -299,6 +299,7 @@ export default function Home() {
 
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
+  const [smsConsent, setSmsConsent] = useState(false);
   const [vehicleDetails, setVehicleDetails] = useState('');
 
   const [placesReady, setPlacesReady] = useState(false);
@@ -515,6 +516,7 @@ useEffect(() => {
         body: JSON.stringify({
          customerName: customerName.trim(),
 customerPhone: customerPhone.trim(),
+ smsConsent,
    leadSource: leadSource,       
 vehicleDetails: vehicleDetails.trim(),
           
@@ -1000,6 +1002,21 @@ SERVING DFW & SURROUNDING AREAS
                 required
               />
 
+              <div style={{ margin: '14px 0' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={smsConsent}
+                    onChange={(e) => setSmsConsent(e.target.checked)}
+                    style={{ width: 18, height: 18, flexShrink: 0, margin: 0 }}
+                  />
+                  <span>Text me my booking confirmation.</span>
+                </label>
+                <p style={{ fontSize: 11, opacity: 0.75, margin: '6px 0 0 27px', lineHeight: 1.5 }}>
+                  TowTruckOnDemand: One confirmation text per request. Msg &amp; data rates may apply. Reply STOP to opt out or HELP for help.
+                </p>
+              </div>
+
               <button
                 className="primary"
                 type="submit"
@@ -1152,6 +1169,7 @@ SERVING DFW & SURROUNDING AREAS
 
                   setCustomerName('');
                   setCustomerPhone('');
+                  setSmsConsent(false);
                   setVehicleDetails('');
                 }}
               >
