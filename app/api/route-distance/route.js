@@ -1,22 +1,31 @@
+import { BookingValidationError, validateLocations, validationMessage } from '../../lib/bookingValidation';
 import { NextResponse } from 'next/server';
 
 export async function POST(request) {
   try {
-    const { origin, destination, originCoordinates } = await request.json();
+    let rawBody;
+    try {
+      rawBody = await request.json();
+    } catch {
+      return NextResponse.json({ error: validationMessage({ code: 'body' }), errorCode: 'body', field: 'body' }, { status: 400 });
+    }
+    let locations;
+    try {
+      locations = validateLocations({
+        pickup: rawBody?.origin,
+        pickupCoordinates: rawBody?.originCoordinates,
+        destination: rawBody?.destination,
+      });
+    } catch (error) {
+      if (!(error instanceof BookingValidationError)) throw error;
+      return NextResponse.json({ error: validationMessage(error, rawBody?.locale), errorCode: error.code, field: error.field }, { status: 400 });
+    }
+    const { pickup: origin, pickupCoordinates: originCoordinates, destination } = locations;
+    const validPin = originCoordinates !== null;
     const apiKey = process.env.GOOGLE_MAPS_API_KEY;
-
     if (!apiKey) {
       return NextResponse.json({ error: 'Google Maps API key is not configured.' }, { status: 500 });
     }
-
-    const hasPin = originCoordinates != null;
-    const validPin = hasPin && typeof originCoordinates.lat === 'number' && typeof originCoordinates.lng === 'number' && Number.isFinite(originCoordinates.lat) && Number.isFinite(originCoordinates.lng) && Math.abs(originCoordinates.lat) <= 90 && Math.abs(originCoordinates.lng) <= 180;
-    if (hasPin && !validPin) return NextResponse.json({ error: 'Invalid pickup coordinates.' }, { status: 400 });
-
-    if ((!origin && !validPin) || !destination) {
-      return NextResponse.json({ error: 'Pickup and drop-off are required.' }, { status: 400 });
-    }
-
 
     try {
       const geocodeQuery = validPin

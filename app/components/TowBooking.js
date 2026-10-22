@@ -1,6 +1,7 @@
 'use client';
 
-import { centralNow, isAfterHoursCentral, readBookingTiming } from '../lib/bookingTiming';
+import { centralNow, isAfterHoursCentral } from '../lib/bookingTiming';
+import { BookingValidationError, validateBooking, validationMessage } from '../lib/bookingValidation';
 import PickupPinMap from './PickupPinMap';
 import { SPANISH } from './spanish';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -237,6 +238,8 @@ function AddressInput({
           setTimeout(() => setOpen(false), 150);
         }}
         placeholder={placeholder}
+        maxLength={500}
+        required
         autoComplete="off"
       />
 
@@ -432,16 +435,6 @@ useEffect(() => {
     return isAfterHoursCentral(current.date, current.time);
   }, [timing, scheduledDate, scheduledTime]);
 
-  function validateTiming() {
-    try {
-      return readBookingTiming({ timing, scheduledDate: timing === 'ASAP' ? '' : scheduledDate, scheduledTime: timing === 'ASAP' ? '' : scheduledTime });
-    } catch (error) {
-      throw new Error(isSpanish
-        ? 'Selecciona una fecha y hora de recogida futuras válidas (hora del centro).'
-        : error.message);
-    }
-  }
-
   const quote = useMemo(() => {
     if (!route) return null;
 
@@ -479,6 +472,23 @@ useEffect(() => {
     afterHours,
   ]);
 
+  function bookingInput() {
+    return {
+      locale, customerName, customerPhone, vehicleDetails, pickup,
+      pickupCoordinates: pickupPin, destination: dropoff, total: quote,
+      miles: route?.exactMiles, vehicleType: vehicle, rolls,
+      nonRolling: rolls === 'No', timing, smsConsent, leadSource,
+      scheduledDate: timing === 'ASAP' ? '' : scheduledDate,
+      scheduledTime: timing === 'ASAP' ? '' : scheduledTime,
+      timeZone: 'America/Chicago',
+      when: timing === 'ASAP' ? 'ASAP' : `${scheduledDate} ${scheduledTime}`,
+    };
+  }
+
+  function checkBooking(requireContact) {
+    return validateBooking(bookingInput(), { requireContact }).booking;
+  }
+
   async function getQuote(e) {
     e.preventDefault();
 
@@ -487,33 +497,10 @@ useEffect(() => {
     setRequestSubmitted(false);
     setShowQuote(false);
 
-    if (
-      !pickup.trim() ||
-      !dropoff.trim()
-    ) {
-      setRouteError(
-        t("Please enter both pickup and drop-off addresses.")
-      );
-
-      return;
-    }
-
-    if (
-      timing === 'Schedule for later' &&
-      (!scheduledDate ||
-        !scheduledTime)
-    ) {
-      setRouteError(
-        t("Please choose a pickup date and time.")
-      );
-
-      return;
-    }
-
     try {
-      validateTiming();
+      checkBooking(false);
     } catch (error) {
-      setRouteError(error.message);
+      setRouteError(error instanceof BookingValidationError ? validationMessage(error, locale) : error.message);
       return;
     }
 
@@ -536,6 +523,7 @@ useEffect(() => {
           },
 
           body: JSON.stringify({
+            locale,
             origin: pickup,
             originCoordinates: pickupPin,
             destination: dropoff,
@@ -547,6 +535,10 @@ useEffect(() => {
         await response.json();
 
       if (!response.ok) {
+        if (data.errorCode) {
+          setRouteError(data.error);
+          return;
+        }
         throw new Error(
           data.error ||
             'Could not calculate route.'
@@ -567,10 +559,11 @@ useEffect(() => {
   async function submitTowRequest(e) {
     e.preventDefault();
     setRequestError('');
+    let validatedBooking;
     try {
-      validateTiming();
+      validatedBooking = checkBooking(true);
     } catch (error) {
-      setRequestError(error.message);
+      setRequestError(error instanceof BookingValidationError ? validationMessage(error, locale) : error.message);
       return;
     }
     setSendingRequest(true);
@@ -581,36 +574,16 @@ useEffect(() => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-         locale,
-         customerName: customerName.trim(),
-customerPhone: customerPhone.trim(),
- smsConsent,
-   leadSource: leadSource,       
-vehicleDetails: vehicleDetails.trim(),
-          
-pickup,
-pickupCoordinates: pickupPin,
-destination: dropoff,
-total: quote,
-          miles: route?.exactMiles,
-          vehicleType: vehicle,
-          rolls,
-          nonRolling: rolls === 'No',
-          timing,
-          scheduledDate: timing === 'ASAP' ? '' : scheduledDate,
-          scheduledTime: timing === 'ASAP' ? '' : scheduledTime,
-          timeZone: 'America/Chicago',
-          when:
-            timing === 'ASAP'
-              ? 'ASAP'
-              : `${scheduledDate} ${scheduledTime}`,
-        }),
+        body: JSON.stringify(validatedBooking),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
+        if (data.errorCode) {
+          setRequestError(data.error);
+          return;
+        }
         throw new Error(
           data.error || 'Could not send your tow request.'
         );
@@ -757,6 +730,7 @@ if (typeof window !== 'undefined' && window.gtag) {
                   <label>{t("Vehicle type")}</label>
 
                   <select
+                    required
                     value={vehicle}
                     onChange={(e) =>
                       setVehicle(
@@ -811,6 +785,7 @@ if (typeof window !== 'undefined' && window.gtag) {
 
                     <input
                       type="date"
+                      required
                       min={centralNow().date}
                       value={
                         scheduledDate
@@ -828,6 +803,7 @@ if (typeof window !== 'undefined' && window.gtag) {
 
                     <input
                       type="time"
+                      required
                       value={
                         scheduledTime
                       }
@@ -853,7 +829,7 @@ if (typeof window !== 'undefined' && window.gtag) {
               </button>
 
               {routeError && (
-                <div className="errorBox">
+                <div className="errorBox" role="alert">
                   {routeError}
                 </div>
               )}
@@ -897,9 +873,9 @@ if (typeof window !== 'undefined' && window.gtag) {
                         type="button"
                         onClick={() => {
                           try {
-                            validateTiming();
+                            checkBooking(false);
                           } catch (error) {
-                            setRouteError(error.message);
+                            setRouteError(error instanceof BookingValidationError ? validationMessage(error, locale) : error.message);
                             return;
                           }
                           setRequestSubmitted(false);
@@ -1038,6 +1014,7 @@ if (typeof window !== 'undefined' && window.gtag) {
 
               <input
                 type="text"
+                maxLength={100}
                 value={customerName}
                 onChange={(e) =>
                   setCustomerName(
@@ -1053,6 +1030,7 @@ if (typeof window !== 'undefined' && window.gtag) {
 
               <input
                 type="tel"
+                maxLength={40}
                 value={customerPhone}
                 onChange={(e) =>
                   setCustomerPhone(
@@ -1068,6 +1046,7 @@ if (typeof window !== 'undefined' && window.gtag) {
 
               <input
                 type="text"
+                maxLength={200}
                 value={vehicleDetails}
                 onChange={(e) =>
                   setVehicleDetails(
@@ -1102,7 +1081,7 @@ if (typeof window !== 'undefined' && window.gtag) {
               </button>
 
               {requestError && (
-                <div className="errorBox">
+                <div className="errorBox" role="alert">
                   {requestError}
                 </div>
               )}

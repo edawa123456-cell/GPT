@@ -1,9 +1,25 @@
-import { readBookingTiming } from '../../lib/bookingTiming';
+import { BookingValidationError, validateBooking, validationMessage } from '../../lib/bookingValidation';
 import { NextResponse } from "next/server";
 
 export async function POST(request) {
   try {
-    const body = await request.json();
+    let rawBody;
+    try {
+      rawBody = await request.json();
+    } catch {
+      return NextResponse.json({ error: validationMessage({ code: 'body' }), errorCode: 'body', field: 'body' }, { status: 400 });
+    }
+    let result;
+    try {
+      result = validateBooking(rawBody);
+    } catch (error) {
+      if (!(error instanceof BookingValidationError)) throw error;
+      return NextResponse.json({
+        error: validationMessage(error, rawBody?.locale),
+        errorCode: error.code, field: error.field,
+      }, { status: 400 });
+    }
+    const { booking: body, requestedTiming } = result;
 
     const {
       locale,
@@ -21,15 +37,7 @@ export async function POST(request) {
 
     } = body;
 
-    let requestedTiming;
-    try {
-      requestedTiming = readBookingTiming(body);
-    } catch (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
-    const nonRolling = typeof body.nonRolling === 'boolean'
-      ? body.nonRolling
-      : body.rolls === 'No' ? true : body.rolls === 'Yes' ? false : null;
+    const nonRolling = body.nonRolling;
     const afterHours = requestedTiming.afterHours;
     const subjectPrefix = requestedTiming.subject;
     const customerLabel = String(customerName || customerPhone || 'Customer').replace(/[\r\n]/g, ' ').slice(0, 100);
