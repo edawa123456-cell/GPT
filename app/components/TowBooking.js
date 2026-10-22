@@ -319,7 +319,6 @@ export default function TowBooking({ locale = "en" }) {
   const [pinAccuracy, setPinAccuracy] = useState(null);
   const [pinBusy, setPinBusy] = useState(false);
   const [pinError, setPinError] = useState('');
-  const [pickupNotes, setPickupNotes] = useState('');
 
   function locatePickup() {
     setPinError('');
@@ -602,7 +601,6 @@ vehicleDetails: vehicleDetails.trim(),
           
 pickup,
 pickupCoordinates: pickupPin,
-pickupNotes: pickupNotes.trim(),
 destination: dropoff,
 total: quote,
           miles: route?.exactMiles,
@@ -729,14 +727,8 @@ if (typeof window !== 'undefined' && window.gtag) {
                 {pickupPin && !draftPin && (
                   <p role="status">
                     {isSpanish ? 'Pin de recogida confirmado.' : 'Pickup pin confirmed.'}{' '}
-                    <button type="button" className="bookButton" onClick={() => { setDraftPin(pickupPin); setRoute(null); setShowQuote(false); }}>{isSpanish ? 'Ajustar pin' : 'Adjust pin'}</button>
+                    <button type="button" onClick={() => { setDraftPin(pickupPin); setRoute(null); setShowQuote(false); }} style={{ display: 'inline', padding: 0, margin: 0, border: 0, background: 'transparent', color: '#0759cc', fontSize: 'inherit', fontWeight: 400, textDecoration: 'underline', cursor: 'pointer' }}>{isSpanish ? 'Ajustar pin' : 'Adjust pin'}</button>
                   </p>
-                )}
-                {(draftPin || pickupPin) && (
-                  <label style={{ display: 'block', marginTop: 12 }}>
-                    {isSpanish ? 'Punto de referencia o lado de la carretera (opcional)' : 'Landmark or side of road (optional)'}
-                    <input type="text" value={pickupNotes} maxLength={500} onChange={(e) => setPickupNotes(e.target.value)} placeholder={isSpanish ? 'Ejemplo: sentido norte, junto a la salida 12' : 'Example: northbound shoulder, near exit 12'} />
-                  </label>
                 )}
               </div>
 
@@ -1223,7 +1215,6 @@ if (typeof window !== 'undefined' && window.gtag) {
                   setPickup('');
                   setPickupPin(null);
                   setDraftPin(null);
-                  setPickupNotes('');
                   setPinAccuracy(null);
                   setPinError('');
                   setDropoff('');
