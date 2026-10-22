@@ -5,6 +5,7 @@ export async function POST(request) {
     const body = await request.json();
 console.log("TOW REQUEST BODY:", body);
     const {
+      locale,
       customerName,
       customerPhone,
       vehicleDetails,
@@ -47,6 +48,7 @@ console.log("TOW REQUEST BODY:", body);
 
         <hr />
 
+        <p><strong>Customer language:</strong> ${locale === "es" ? "Spanish" : "English"}</p>
         <h2>Customer</h2>
 
         <p>
