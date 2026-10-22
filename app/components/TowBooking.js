@@ -122,6 +122,7 @@ function AddressInput({
   onPlacesError,
   t = (text) => text,
   locale = "en",
+  locationBias,
 }) {
   const [suggestions, setSuggestions] = useState([]);
   const [open, setOpen] = useState(false);
@@ -172,7 +173,9 @@ function AddressInput({
         const request = {
           input: value.trim(),
           includedRegionCodes: ['us'],
-          language: locale,
+          language: "en",
+          region: "us",
+          ...(locationBias ? { locationBias } : {}),
         };
 
         if (token) {
@@ -214,7 +217,7 @@ function AddressInput({
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [value, placesReady, sessionToken, onPlacesError, locale]);
+  }, [value, placesReady, sessionToken, onPlacesError, locale, locationBias]);
 
   function choose(item) {
     requestId.current += 1;
@@ -262,7 +265,6 @@ function AddressInput({
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => choose(item)}
             >
-              <span className="pin">⌖</span>
               <span>{item.text}</span>
             </button>
           ))}
@@ -286,6 +288,34 @@ export default function TowBooking({ locale = "en" }) {
     document.documentElement.lang = locale;
     setLanguageHref(`${isSpanish ? "/" : "/es"}${window.location.search}`);
   }, [locale, isSpanish]);
+  const [locationBias, setLocationBias] = useState(null);
+  const [locating, setLocating] = useState(false);
+  const [locationNotice, setLocationNotice] = useState('');
+
+  function useMyLocation() {
+    if (!navigator.geolocation) {
+      setLocationNotice(isSpanish ? 'Tu navegador no permite compartir la ubicación. Incluye la ciudad en la dirección.' : 'Location is unavailable. Include the city in your address.');
+      return;
+    }
+    setLocating(true);
+    setLocationNotice('');
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        setLocationBias({
+          center: { lat: coords.latitude, lng: coords.longitude },
+          radius: 30000,
+        });
+        setLocating(false);
+        setLocationNotice(isSpanish ? 'Se priorizarán las direcciones cercanas a ti.' : 'Nearby addresses will be prioritized.');
+      },
+      () => {
+        setLocating(false);
+        setLocationNotice(isSpanish ? 'No se pudo obtener tu ubicación. Incluye la ciudad en la dirección.' : 'Could not access your location. Include the city in your address.');
+      },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+    );
+  }
+
   const [leadSource, setLeadSource] = useState('Direct');
   const [pickup, setPickup] = useState('');
   const [dropoff, setDropoff] = useState('');
@@ -613,7 +643,21 @@ if (typeof window !== 'undefined' && window.gtag) {
 
               <div className="stepTitle">{t("Get your towing price")}</div>
 
+              <button
+                type="button"
+                onClick={useMyLocation}
+                disabled={locating}
+                className="callLink"
+                style={{ marginBottom: 12 }}
+              >
+                {locating
+                  ? (isSpanish ? 'Buscando ubicación…' : 'Finding location…')
+                  : (isSpanish ? 'Usar mi ubicación para sugerencias cercanas' : 'Use my location for nearby suggestions')}
+              </button>
+              {locationNotice && <p role="status" className="finePrint">{locationNotice}</p>}
+
               <AddressInput
+                locationBias={locationBias}
                 t={t}
                 locale={locale}
                 label={t("Pickup location")}
@@ -629,6 +673,7 @@ if (typeof window !== 'undefined' && window.gtag) {
               />
 
               <AddressInput
+                locationBias={locationBias}
                 t={t}
                 locale={locale}
                 label={t("Drop-off location")}
