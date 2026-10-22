@@ -705,10 +705,10 @@ if (typeof window !== 'undefined' && window.gtag) {
               />
 
               <div style={{ margin: '8px 0 18px' }}>
-                <button type="button" className="callLink" onClick={locatePickup} disabled={pinBusy}>
+                <button type="button" onClick={locatePickup} disabled={pinBusy} style={{ display: 'inline-block', width: 'auto', padding: '4px 0', border: 0, borderRadius: 0, background: 'transparent', color: '#0759cc', fontSize: 14, fontWeight: 400, lineHeight: 1.5, textAlign: 'left', textDecoration: 'underline', cursor: pinBusy ? 'wait' : 'pointer' }}>
                   {pinBusy
                     ? (isSpanish ? 'Buscando tu ubicación…' : 'Finding your location…')
-                    : (isSpanish ? '¿No sabes la dirección? Usar mi ubicación actual' : "Don't know the address? Use my current location")}
+                    : (isSpanish ? 'Usar mi ubicación actual' : 'Use my current location')}
                 </button>
                 {pinError && <p role="alert" className="errorBox">{pinError}</p>}
                 {draftPin && (
