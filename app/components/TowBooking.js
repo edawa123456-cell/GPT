@@ -357,6 +357,9 @@ export default function TowBooking({ locale = "en" }) {
   const [booked, setBooked] = useState(false);
   const [requestSubmitted, setRequestSubmitted] = useState(false);
   const [sendingRequest, setSendingRequest] = useState(false);
+  const [bookingReference, setBookingReference] = useState('');
+  const submission = useRef(null);
+  const submitting = useRef(false);
   const [requestError, setRequestError] = useState('');
 
   const [customerName, setCustomerName] = useState('');
@@ -558,6 +561,7 @@ useEffect(() => {
 
   async function submitTowRequest(e) {
     e.preventDefault();
+    if (submitting.current) return;
     setRequestError('');
     let validatedBooking;
     try {
@@ -566,6 +570,11 @@ useEffect(() => {
       setRequestError(error instanceof BookingValidationError ? validationMessage(error, locale) : error.message);
       return;
     }
+    const payload = JSON.stringify(validatedBooking);
+    if (submission.current?.payload !== payload) {
+      submission.current = { payload, key: crypto.randomUUID() };
+    }
+    submitting.current = true;
     setSendingRequest(true);
 
     try {
@@ -573,8 +582,9 @@ useEffect(() => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Idempotency-Key': submission.current.key,
         },
-        body: JSON.stringify(validatedBooking),
+        body: payload,
       });
 
       const data = await response.json();
@@ -588,13 +598,14 @@ useEffect(() => {
           data.error || 'Could not send your tow request.'
         );
       }
-if (typeof window !== 'undefined' && window.gtag) {
+if (!data.duplicate && typeof window !== 'undefined' && window.gtag) {
   window.gtag('event', 'conversion', {
     send_to: 'AW-18487849737/r7DCCNP3jY0dEInm2o9E',
     value: 1.0,
     currency: 'USD',
   });
 }
+      setBookingReference(data.reference || '');
       setRequestSubmitted(true);
     } catch (error) {
       console.error('Tow request submission error:', error);
@@ -602,6 +613,7 @@ if (typeof window !== 'undefined' && window.gtag) {
         isSpanish ? t("Could not send your tow request. Please try again.") : error?.message || "Could not send your tow request. Please try again."
       );
     } finally {
+      submitting.current = false;
       setSendingRequest(false);
     }
   }
@@ -879,6 +891,8 @@ if (typeof window !== 'undefined' && window.gtag) {
                             return;
                           }
                           setRequestSubmitted(false);
+                          setBookingReference('');
+                          submission.current = null;
                           setBooked(true);
                         }}
                       >{t("BOOK THIS TOW")}</button>
@@ -1107,6 +1121,7 @@ if (typeof window !== 'undefined' && window.gtag) {
               </div>
 
               <h2>{t("Tow request received")}</h2>
+              {bookingReference && <p><strong>{isSpanish ? 'Referencia' : 'Booking reference'}: {bookingReference}</strong></p>}
 
               <p>{t("Your tow request has been received. We may call or text you if we need more information.")}</p>
 
@@ -1195,6 +1210,8 @@ if (typeof window !== 'undefined' && window.gtag) {
                 onClick={() => {
                   setBooked(false);
                   setRequestSubmitted(false);
+                  setBookingReference('');
+                  submission.current = null;
                   setShowQuote(false);
                   setRoute(null);
 

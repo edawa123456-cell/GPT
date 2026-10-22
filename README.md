@@ -32,12 +32,13 @@ Enable the following APIs in Google Cloud:
 
 After adding the variables, redeploy the project.
 
-## What is not connected yet
+## Booking records and notifications
 
-- Customer name/phone checkout step
-- SMS confirmation to customer
-- SMS/email notification to owner
-- Booking database
-- Payment
+Booking requests are validated on the server and emailed through Resend. This branch
+also saves requests to private PostgreSQL storage before sending the notification,
+assigns a booking reference, and protects against repeated submissions.
 
-Those should be the next build phase after the real address and mileage calculation is verified.
+**Deployment prerequisite:** follow [database setup](database/README.md) before
+merging/deploying this feature. SMS and online payments are not implemented.
+
+Run `npm ci`, `npm test`, and `npm run build` to validate locally.

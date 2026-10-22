@@ -85,9 +85,15 @@ test('locations accept address OR pin; error messages exist in English and Spani
   assert.match(validationMessage({ code: 'customerPhone' }, 'en'), /phone/);
 });
 
+const storeUrl = moduleUrl(`
+export async function saveBooking(payload, requested_timing) { return { id: 'mock', reference: 'TTOD-TEST', payload, requested_timing, notification_status: 'pending', duplicate: false }; }
+export async function claimNotification(id, notification_payload) { return { notification_payload, lease_token: 'mock' }; }
+export async function finishNotification() {}
+`);
 async function routeHandler(path) {
   const source = (await readFile(new URL(`../${path}`, import.meta.url), 'utf8'))
     .replace("'../../lib/bookingValidation'", JSON.stringify(validationUrl))
+    .replace("'../../lib/bookingStore'", JSON.stringify(storeUrl))
     .replace(/import \{ NextResponse \} from ['"]next\/server['"];?/, 'const NextResponse = { json: (body, init) => Response.json(body, init) };');
   return (await import(moduleUrl(source))).POST;
 }
