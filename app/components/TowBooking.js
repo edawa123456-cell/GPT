@@ -1,5 +1,6 @@
 'use client';
 
+import { centralNow, isAfterHoursCentral, readBookingTiming } from '../lib/bookingTiming';
 import PickupPinMap from './PickupPinMap';
 import { SPANISH } from './spanish';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -20,22 +21,6 @@ const PER_MILE = 7;
 const MINIMUM_CHARGE = 100;
 const NON_ROLLING_SURCHARGE = 40;
 const AFTER_HOURS_SURCHARGE = 60;
-
-function isAfterHours(dateValue, timeValue) {
-  if (!dateValue || !timeValue) return false;
-
-  const local = new Date(`${dateValue}T${timeValue}:00`);
-  if (Number.isNaN(local.getTime())) return false;
-
-  const day = local.getDay();
-  const [hour, minute] = timeValue.split(':').map(Number);
-  const minutes = hour * 60 + minute;
-
-  const open = 8 * 60;
-  const close = 18 * 60;
-
-  return day === 0 || minutes < open || minutes >= close;
-}
 
 /* GOOGLE MAPS LOADER */
 
@@ -441,29 +426,21 @@ useEffect(() => {
 
   const afterHours = useMemo(() => {
     if (timing === 'Schedule for later') {
-      return isAfterHours(
-        scheduledDate,
-        scheduledTime
-      );
+      return isAfterHoursCentral(scheduledDate, scheduledTime);
     }
+    const current = centralNow();
+    return isAfterHoursCentral(current.date, current.time);
+  }, [timing, scheduledDate, scheduledTime]);
 
-    const now = new Date();
-    const day = now.getDay();
-
-    const mins =
-      now.getHours() * 60 +
-      now.getMinutes();
-
-    return (
-      day === 0 ||
-      mins < 8 * 60 ||
-      mins >= 18 * 60
-    );
-  }, [
-    timing,
-    scheduledDate,
-    scheduledTime,
-  ]);
+  function validateTiming() {
+    try {
+      return readBookingTiming({ timing, scheduledDate: timing === 'ASAP' ? '' : scheduledDate, scheduledTime: timing === 'ASAP' ? '' : scheduledTime });
+    } catch (error) {
+      throw new Error(isSpanish
+        ? 'Selecciona una fecha y hora de recogida futuras válidas (hora del centro).'
+        : error.message);
+    }
+  }
 
   const quote = useMemo(() => {
     if (!route) return null;
@@ -533,6 +510,13 @@ useEffect(() => {
       return;
     }
 
+    try {
+      validateTiming();
+    } catch (error) {
+      setRouteError(error.message);
+      return;
+    }
+
     if (draftPin) {
       setRouteError(isSpanish ? 'Confirma el pin de recogida antes de cotizar.' : 'Confirm your pickup pin before getting a quote.');
       return;
@@ -583,6 +567,12 @@ useEffect(() => {
   async function submitTowRequest(e) {
     e.preventDefault();
     setRequestError('');
+    try {
+      validateTiming();
+    } catch (error) {
+      setRequestError(error.message);
+      return;
+    }
     setSendingRequest(true);
 
     try {
@@ -606,6 +596,11 @@ total: quote,
           miles: route?.exactMiles,
           vehicleType: vehicle,
           rolls,
+          nonRolling: rolls === 'No',
+          timing,
+          scheduledDate: timing === 'ASAP' ? '' : scheduledDate,
+          scheduledTime: timing === 'ASAP' ? '' : scheduledTime,
+          timeZone: 'America/Chicago',
           when:
             timing === 'ASAP'
               ? 'ASAP'
@@ -816,6 +811,7 @@ if (typeof window !== 'undefined' && window.gtag) {
 
                     <input
                       type="date"
+                      min={centralNow().date}
                       value={
                         scheduledDate
                       }
@@ -828,7 +824,7 @@ if (typeof window !== 'undefined' && window.gtag) {
                   </div>
 
                   <div>
-                    <label>{t("Pickup time")}</label>
+                    <label>{isSpanish ? "Hora de recogida (hora del centro)" : "Pickup time (Central Time)"}</label>
 
                     <input
                       type="time"
@@ -900,6 +896,12 @@ if (typeof window !== 'undefined' && window.gtag) {
                         className="bookButton"
                         type="button"
                         onClick={() => {
+                          try {
+                            validateTiming();
+                          } catch (error) {
+                            setRouteError(error.message);
+                            return;
+                          }
                           setRequestSubmitted(false);
                           setBooked(true);
                         }}
@@ -1010,6 +1012,11 @@ if (typeof window !== 'undefined' && window.gtag) {
               </div>
 
               <div className="summary">
+
+                <div>
+                  <span>{isSpanish ? 'Recogida solicitada · hora del centro' : 'Requested pickup · Central Time'}</span>
+                  <strong>{timing === 'ASAP' ? t('ASAP') : `${scheduledDate} ${scheduledTime}`}</strong>
+                </div>
 
                 <div>
                   <span>{t("Pickup")}</span>
@@ -1186,7 +1193,7 @@ if (typeof window !== 'undefined' && window.gtag) {
                 </div>
 
                 <div>
-                  <span>{t("Timing")}</span>
+                  <span>{isSpanish ? 'Horario · hora del centro' : 'Timing · Central Time'}</span>
 
                   <strong>
                     {timing === 'ASAP'

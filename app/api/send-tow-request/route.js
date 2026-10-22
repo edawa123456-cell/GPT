@@ -1,9 +1,10 @@
+import { readBookingTiming } from '../../lib/bookingTiming';
 import { NextResponse } from "next/server";
 
 export async function POST(request) {
   try {
     const body = await request.json();
-console.log("TOW REQUEST BODY:", body);
+
     const {
       locale,
       customerName,
@@ -15,14 +16,23 @@ console.log("TOW REQUEST BODY:", body);
       destination,
       miles,
       total,
-      date,
-      time,
       vehicleType,
-      nonRolling,
-      afterHours,
             leadSource,
 
     } = body;
+
+    let requestedTiming;
+    try {
+      requestedTiming = readBookingTiming(body);
+    } catch (error) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+    const nonRolling = typeof body.nonRolling === 'boolean'
+      ? body.nonRolling
+      : body.rolls === 'No' ? true : body.rolls === 'Yes' ? false : null;
+    const afterHours = requestedTiming.afterHours;
+    const subjectPrefix = requestedTiming.subject;
+    const customerLabel = String(customerName || customerPhone || 'Customer').replace(/[\r\n]/g, ' ').slice(0, 100);
 
     const hasPin = pickupCoordinates != null;
     const validPin = hasPin && typeof pickupCoordinates.lat === 'number' && typeof pickupCoordinates.lng === 'number' && Number.isFinite(pickupCoordinates.lat) && Number.isFinite(pickupCoordinates.lng) && Math.abs(pickupCoordinates.lat) <= 90 && Math.abs(pickupCoordinates.lng) <= 180;
@@ -49,6 +59,11 @@ console.log("TOW REQUEST BODY:", body);
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 650px; margin: auto;">
         <h1 style="margin-bottom: 5px;">New Tow Request</h1>
+
+        <div style="padding:16px;background:${requestedTiming.kind === 'scheduled' ? '#fff3cd' : '#eef5ff'};border:2px solid #172033;border-radius:8px;margin:16px 0;">
+          <strong style="font-size:20px;">${requestedTiming.kind === 'scheduled' ? 'SCHEDULED PICKUP — NOT AN IMMEDIATE DISPATCH' : requestedTiming.kind === 'asap' ? 'ASAP REQUEST' : 'CONFIRM PICKUP TIME BEFORE DISPATCH'}</strong>
+          <p style="font-size:20px;margin:8px 0 0;">${escapeHtml(requestedTiming.label)}</p>
+        </div>
 
         <p style="font-size: 20px; font-weight: bold;">
           Quote: $${total ?? "N/A"}
@@ -83,7 +98,7 @@ console.log("TOW REQUEST BODY:", body);
 
         <p>
           <strong>Non-Rolling:</strong>
-          ${nonRolling ? "Yes" : "No"}
+          ${nonRolling === null ? "Not provided — confirm with customer" : nonRolling ? "Yes" : "No"}
         </p>
 
         <h2>Trip</h2>
@@ -106,21 +121,12 @@ console.log("TOW REQUEST BODY:", body);
           ${miles ?? "N/A"} miles
         </p>
 
-        <h2>Requested Time</h2>
-
-        <p>
-          <strong>Date:</strong>
-          ${date || "Not provided"}
-        </p>
-
-        <p>
-          <strong>Time:</strong>
-          ${time || "Not provided"}
-        </p>
+        <h2>Requested Pickup</h2>
+        <p>${escapeHtml(requestedTiming.label)}</p>
 
         <p>
           <strong>After Hours:</strong>
-          ${afterHours ? "Yes" : "No"}
+          ${afterHours === null ? "Not provided" : afterHours ? "Yes" : "No"}
         </p>
 
        <p>
@@ -144,7 +150,7 @@ console.log("TOW REQUEST BODY:", body);
       body: JSON.stringify({
        from: "TowTruckOnDemand <notifications@towtruckondemand.com>",
 to: [process.env.TOW_REQUEST_EMAIL],
-        subject: `New Tow Request - ${customerName || customerPhone || "Customer"}`,
+        subject: `[${subjectPrefix}] New Tow Request - ${customerLabel}`,
         html: emailHtml,
       }),
     });
