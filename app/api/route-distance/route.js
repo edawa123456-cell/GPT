@@ -2,21 +2,28 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request) {
   try {
-    const { origin, destination } = await request.json();
+    const { origin, destination, originCoordinates } = await request.json();
     const apiKey = process.env.GOOGLE_MAPS_API_KEY;
 
     if (!apiKey) {
       return NextResponse.json({ error: 'Google Maps API key is not configured.' }, { status: 500 });
     }
 
-    if (!origin || !destination) {
+    const hasPin = originCoordinates != null;
+    const validPin = hasPin && typeof originCoordinates.lat === 'number' && typeof originCoordinates.lng === 'number' && Number.isFinite(originCoordinates.lat) && Number.isFinite(originCoordinates.lng) && Math.abs(originCoordinates.lat) <= 90 && Math.abs(originCoordinates.lng) <= 180;
+    if (hasPin && !validPin) return NextResponse.json({ error: 'Invalid pickup coordinates.' }, { status: 400 });
+
+    if ((!origin && !validPin) || !destination) {
       return NextResponse.json({ error: 'Pickup and drop-off are required.' }, { status: 400 });
     }
 
 
     try {
+      const geocodeQuery = validPin
+        ? `latlng=${originCoordinates.lat},${originCoordinates.lng}`
+        : `address=${encodeURIComponent(origin)}`;
       const geoResponse = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(origin)}&key=${apiKey}`
+        `https://maps.googleapis.com/maps/api/geocode/json?${geocodeQuery}&key=${apiKey}`
       );
 
       const geoData = await geoResponse.json();
@@ -55,7 +62,9 @@ export async function POST(request) {
         'X-Goog-FieldMask': 'routes.distanceMeters,routes.duration'
       },
       body: JSON.stringify({
-        origin: { address: origin },
+        origin: validPin
+          ? { location: { latLng: { latitude: originCoordinates.lat, longitude: originCoordinates.lng } } }
+          : { address: origin },
         destination: { address: destination },
         travelMode: 'DRIVE',
         routingPreference: 'TRAFFIC_AWARE'

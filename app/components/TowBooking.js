@@ -1,5 +1,6 @@
 'use client';
 
+import PickupPinMap from './PickupPinMap';
 import { SPANISH } from './spanish';
 import { useEffect, useMemo, useRef, useState } from 'react';
 const REFERRAL_PARTNERS = {
@@ -313,6 +314,46 @@ export default function TowBooking({ locale = "en" }) {
   const [leadSource, setLeadSource] = useState('Direct');
   const [pickup, setPickup] = useState('');
   const [dropoff, setDropoff] = useState('');
+  const [pickupPin, setPickupPin] = useState(null);
+  const [draftPin, setDraftPin] = useState(null);
+  const [pinAccuracy, setPinAccuracy] = useState(null);
+  const [pinBusy, setPinBusy] = useState(false);
+  const [pinError, setPinError] = useState('');
+  const [pickupNotes, setPickupNotes] = useState('');
+
+  function locatePickup() {
+    setPinError('');
+    if (!navigator.geolocation) {
+      setPinError(isSpanish ? 'Tu navegador no permite obtener la ubicación. Escribe una dirección o un punto de referencia.' : 'Location is unavailable in this browser. Enter an address or landmark instead.');
+      return;
+    }
+    setPinBusy(true);
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        setDraftPin({ lat: coords.latitude, lng: coords.longitude });
+        setPinAccuracy(Math.round(coords.accuracy));
+        setLocationBias({ center: { lat: coords.latitude, lng: coords.longitude }, radius: 30000 });
+        setRoute(null);
+        setShowQuote(false);
+        setPinBusy(false);
+      },
+      (error) => {
+        setPinBusy(false);
+        setPinError(isSpanish
+          ? (error.code === 1 ? 'Permite el acceso a tu ubicación o escribe una dirección.' : 'No se pudo obtener tu ubicación. Inténtalo de nuevo o escribe una dirección.')
+          : (error.code === 1 ? 'Allow location access or type an address instead.' : 'Could not get your location. Try again or type an address.'));
+      },
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
+    );
+  }
+
+  function confirmPickupPin() {
+    setPickupPin(draftPin);
+    setPickup(`GPS: ${draftPin.lat.toFixed(6)}, ${draftPin.lng.toFixed(6)}`);
+    setDraftPin(null);
+    setRoute(null);
+    setShowQuote(false);
+  }
 
   const [vehicle, setVehicle] = useState('Sedan');
   const [rolls, setRolls] = useState('Yes');
@@ -493,6 +534,11 @@ useEffect(() => {
       return;
     }
 
+    if (draftPin) {
+      setRouteError(isSpanish ? 'Confirma el pin de recogida antes de cotizar.' : 'Confirm your pickup pin before getting a quote.');
+      return;
+    }
+
     setLoadingRoute(true);
 
     try {
@@ -508,6 +554,7 @@ useEffect(() => {
 
           body: JSON.stringify({
             origin: pickup,
+            originCoordinates: pickupPin,
             destination: dropoff,
           }),
         }
@@ -554,6 +601,8 @@ customerPhone: customerPhone.trim(),
 vehicleDetails: vehicleDetails.trim(),
           
 pickup,
+pickupCoordinates: pickupPin,
+pickupNotes: pickupNotes.trim(),
 destination: dropoff,
 total: quote,
           miles: route?.exactMiles,
@@ -649,10 +698,47 @@ if (typeof window !== 'undefined' && window.gtag) {
                 onPlacesError={setPlacesError}
                 onChange={(value) => {
                   setPickup(value);
+                  setPickupPin(null);
+                  setDraftPin(null);
+                  setPinError('');
                   setRoute(null);
                   setShowQuote(false);
                 }}
               />
+
+              <div style={{ margin: '8px 0 18px' }}>
+                <button type="button" className="callLink" onClick={locatePickup} disabled={pinBusy}>
+                  {pinBusy
+                    ? (isSpanish ? 'Buscando tu ubicación…' : 'Finding your location…')
+                    : (isSpanish ? '¿No sabes la dirección? Usar mi ubicación actual' : "Don't know the address? Use my current location")}
+                </button>
+                {pinError && <p role="alert" className="errorBox">{pinError}</p>}
+                {draftPin && (
+                  <div style={{ marginTop: 12 }}>
+                    {placesReady
+                      ? <PickupPinMap initialPin={draftPin} onMove={setDraftPin} isSpanish={isSpanish} />
+                      : <p>{isSpanish ? 'Mapa no disponible. Puedes confirmar las coordenadas del GPS.' : 'Map unavailable. You can confirm the GPS coordinates.'}</p>}
+                    <p className="finePrint">
+                      {draftPin.lat.toFixed(6)}, {draftPin.lng.toFixed(6)}
+                      {pinAccuracy !== null && ` · ${isSpanish ? 'Precisión inicial del GPS' : 'Initial GPS accuracy'}: ±${pinAccuracy} m`}
+                    </p>
+                    <button type="button" className="bookButton" onClick={confirmPickupPin}>{isSpanish ? 'Confirmar este lugar de recogida' : 'Confirm this pickup pin'}</button>
+                    <button type="button" className="bookButton" onClick={() => setDraftPin(null)}>{isSpanish ? 'Cancelar' : 'Cancel'}</button>
+                  </div>
+                )}
+                {pickupPin && !draftPin && (
+                  <p role="status">
+                    {isSpanish ? 'Pin de recogida confirmado.' : 'Pickup pin confirmed.'}{' '}
+                    <button type="button" className="bookButton" onClick={() => { setDraftPin(pickupPin); setRoute(null); setShowQuote(false); }}>{isSpanish ? 'Ajustar pin' : 'Adjust pin'}</button>
+                  </p>
+                )}
+                {(draftPin || pickupPin) && (
+                  <label style={{ display: 'block', marginTop: 12 }}>
+                    {isSpanish ? 'Punto de referencia o lado de la carretera (opcional)' : 'Landmark or side of road (optional)'}
+                    <input type="text" value={pickupNotes} maxLength={500} onChange={(e) => setPickupNotes(e.target.value)} placeholder={isSpanish ? 'Ejemplo: sentido norte, junto a la salida 12' : 'Example: northbound shoulder, near exit 12'} />
+                  </label>
+                )}
+              </div>
 
               <AddressInput
                 onAddressFocus={requestLocationOnce}
@@ -1135,6 +1221,11 @@ if (typeof window !== 'undefined' && window.gtag) {
                   setRoute(null);
 
                   setPickup('');
+                  setPickupPin(null);
+                  setDraftPin(null);
+                  setPickupNotes('');
+                  setPinAccuracy(null);
+                  setPinError('');
                   setDropoff('');
 
                   setCustomerName('');

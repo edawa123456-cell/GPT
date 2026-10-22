@@ -10,6 +10,8 @@ console.log("TOW REQUEST BODY:", body);
       customerPhone,
       vehicleDetails,
       pickup,
+      pickupCoordinates,
+      pickupNotes,
       destination,
       miles,
       total,
@@ -21,6 +23,12 @@ console.log("TOW REQUEST BODY:", body);
             leadSource,
 
     } = body;
+
+    const hasPin = pickupCoordinates != null;
+    const validPin = hasPin && typeof pickupCoordinates.lat === 'number' && typeof pickupCoordinates.lng === 'number' && Number.isFinite(pickupCoordinates.lat) && Number.isFinite(pickupCoordinates.lng) && Math.abs(pickupCoordinates.lat) <= 90 && Math.abs(pickupCoordinates.lng) <= 180;
+    if (hasPin && !validPin) return NextResponse.json({ error: 'Invalid pickup coordinates.' }, { status: 400 });
+    const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+    const mapsLink = validPin ? `https://www.google.com/maps/search/?api=1&query=${pickupCoordinates.lat},${pickupCoordinates.lng}` : null;
 
     if (!process.env.RESEND_API_KEY) {
       console.error("RESEND_API_KEY is missing");
@@ -82,8 +90,11 @@ console.log("TOW REQUEST BODY:", body);
 
         <p>
           <strong>Pickup:</strong><br />
-          ${pickup || "Not provided"}
+          ${escapeHtml(pickup || "Not provided")}
         </p>
+
+        ${mapsLink ? `<p><strong>Confirmed pickup pin:</strong> ${pickupCoordinates.lat}, ${pickupCoordinates.lng}<br /><a href="${mapsLink}">Open pickup pin in Google Maps</a></p>` : ''}
+        ${pickupNotes ? `<p><strong>Pickup notes:</strong> ${escapeHtml(String(pickupNotes).slice(0, 500))}</p>` : ''}
 
         <p>
           <strong>Destination:</strong><br />
