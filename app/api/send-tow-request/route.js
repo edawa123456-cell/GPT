@@ -9,9 +9,10 @@ export async function POST(request) {
     } catch {
       return NextResponse.json({ error: validationMessage({ code: 'body' }), errorCode: 'body', field: 'body' }, { status: 400 });
     }
+    const evaluatedAt = new Date();
     let result;
     try {
-      result = validateBooking(rawBody);
+      result = validateBooking(rawBody, { now: evaluatedAt });
     } catch (error) {
       if (!(error instanceof BookingValidationError)) throw error;
       return NextResponse.json({
@@ -20,6 +21,21 @@ export async function POST(request) {
       }, { status: 400 });
     }
     const { booking: body, requestedTiming } = result;
+    // Guard the timing boundary between the customer's last price check and arrival
+    // at the server. This does not verify route distance or replace price validation.
+    if (body.quotedAfterHours != null && typeof body.quotedAfterHours !== 'boolean') {
+      return NextResponse.json({ error: 'Invalid quoted service hours.' }, { status: 400 });
+    }
+    if (requestedTiming.kind === 'asap' && typeof body.quotedAfterHours === 'boolean'
+      && body.quotedAfterHours !== requestedTiming.afterHours) {
+      return NextResponse.json({
+        errorCode: 'pickup_hours_changed', afterHours: requestedTiming.afterHours,
+        evaluatedAt: evaluatedAt.toISOString(),
+        error: body.locale === 'es'
+          ? 'Cambió el horario de servicio. Revisa el precio actualizado y confirma otra vez.'
+          : 'Service hours changed. Review the updated price and confirm again.',
+      }, { status: 409 });
+    }
 
     const {
       locale,

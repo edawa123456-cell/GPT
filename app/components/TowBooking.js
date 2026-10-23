@@ -1,6 +1,7 @@
 'use client';
 
 import { centralNow, isAfterHoursCentral } from '../lib/bookingTiming';
+import { calculateTowPrice, reviewTowPrice, HOOKUP_FEE, PER_MILE, VEHICLE_SURCHARGE, NON_ROLLING_SURCHARGE, AFTER_HOURS_SURCHARGE } from '../lib/bookingPrice';
 import { BookingValidationError, validateBooking, validationMessage } from '../lib/bookingValidation';
 import PickupPinMap from './PickupPinMap';
 import { SPANISH } from './spanish';
@@ -11,18 +12,6 @@ const REFERRAL_PARTNERS = {
   'j-jasmine-towing': 'J-Jasmine Towing',
   'jasmine-towing': 'Jasmine Towing',
 };
-const VEHICLE_SURCHARGE = {
-  Sedan: 0,
-  SUV: 15,
-  Pickup: 15,
-};
-
-const HOOKUP_FEE = 80;
-const PER_MILE = 7;
-const MINIMUM_CHARGE = 100;
-const NON_ROLLING_SURCHARGE = 40;
-const AFTER_HOURS_SURCHARGE = 60;
-
 /* GOOGLE MAPS LOADER */
 
 let googleMapsPromise = null;
@@ -348,6 +337,22 @@ export default function TowBooking({ locale = "en" }) {
   const [timing, setTiming] = useState('ASAP');
   const [scheduledDate, setScheduledDate] = useState('');
   const [scheduledTime, setScheduledTime] = useState('');
+  const serverClockOffset = useRef(0);
+  const [asapAfterHours, setAsapAfterHours] = useState(() => {
+    const current = centralNow();
+    return isAfterHoursCentral(current.date, current.time);
+  });
+
+  function currentAsapHours() {
+    const current = centralNow(new Date(Date.now() + serverClockOffset.current));
+    return isAfterHoursCentral(current.date, current.time);
+  }
+
+  function priceChangeMessage(total) {
+    return isSpanish
+      ? `Cambió el horario de servicio. Tu precio actualizado es $${total}. Revisa el importe y pulsa SOLICITAR MI GRÚA otra vez para confirmarlo. Todavía no se ha enviado la solicitud.`
+      : `Service hours changed. Your updated price is $${total}. Review it and press REQUEST MY TOW again to confirm. Your request has not been sent yet.`;
+  }
 
   const [route, setRoute] = useState(null);
   const [routeError, setRouteError] = useState('');
@@ -427,50 +432,13 @@ useEffect(() => {
     };
   }, []);
 
-  const afterHours = useMemo(() => {
-    if (timing === 'Schedule for later') {
-      return isAfterHoursCentral(scheduledDate, scheduledTime);
-    }
-    const current = centralNow();
-    return isAfterHoursCentral(current.date, current.time);
-  }, [timing, scheduledDate, scheduledTime]);
+  const afterHours = timing === 'Schedule for later'
+    ? isAfterHoursCentral(scheduledDate, scheduledTime)
+    : asapAfterHours;
 
-  const quote = useMemo(() => {
-    if (!route) return null;
-
-    const mileageCharge =
-      route.billedMiles * PER_MILE;
-
-    const vehicleCharge =
-      VEHICLE_SURCHARGE[vehicle] || 0;
-
-    const rollingCharge =
-      rolls === 'No'
-        ? NON_ROLLING_SURCHARGE
-        : 0;
-
-    const hoursCharge =
-      afterHours
-        ? AFTER_HOURS_SURCHARGE
-        : 0;
-
-    const subtotal =
-      HOOKUP_FEE +
-      mileageCharge +
-      vehicleCharge +
-      rollingCharge +
-      hoursCharge;
-
-    return Math.max(
-      MINIMUM_CHARGE,
-      subtotal
-    );
-  }, [
-    route,
-    vehicle,
-    rolls,
-    afterHours,
-  ]);
+  const quote = useMemo(() => calculateTowPrice({
+    billedMiles: route?.billedMiles, vehicle, rolls, afterHours,
+  }), [route, vehicle, rolls, afterHours]);
 
   function bookingInput() {
     return {
@@ -478,6 +446,7 @@ useEffect(() => {
       pickupCoordinates: pickupPin, destination: dropoff, total: quote,
       miles: route?.exactMiles, vehicleType: vehicle, rolls,
       nonRolling: rolls === 'No', timing, smsConsent, leadSource,
+      quotedAfterHours: afterHours,
       scheduledDate: timing === 'ASAP' ? '' : scheduledDate,
       scheduledTime: timing === 'ASAP' ? '' : scheduledTime,
       timeZone: 'America/Chicago',
@@ -535,6 +504,14 @@ useEffect(() => {
         await response.json();
 
       if (!response.ok) {
+        if (data.errorCode === 'pickup_hours_changed' && typeof data.afterHours === 'boolean') {
+          const serverTime = Date.parse(data.evaluatedAt);
+          if (Number.isFinite(serverTime)) serverClockOffset.current = serverTime - Date.now();
+          setAsapAfterHours(data.afterHours);
+          const updatedTotal = calculateTowPrice({ billedMiles: route?.billedMiles, vehicle, rolls, afterHours: data.afterHours });
+          setRequestError(priceChangeMessage(updatedTotal));
+          return;
+        }
         if (data.errorCode) {
           setRouteError(data.error);
           return;
@@ -546,6 +523,7 @@ useEffect(() => {
       }
 
       setRoute(data);
+      if (timing === 'ASAP') setAsapAfterHours(currentAsapHours());
       setShowQuote(true);
     } catch (error) {
       setRouteError(
@@ -566,6 +544,18 @@ useEffect(() => {
       setRequestError(error instanceof BookingValidationError ? validationMessage(error, locale) : error.message);
       return;
     }
+    if (timing === 'ASAP') {
+      const freshAfterHours = currentAsapHours();
+      const review = reviewTowPrice(quote, {
+        billedMiles: route?.billedMiles, vehicle, rolls, afterHours: freshAfterHours,
+      });
+      setAsapAfterHours(freshAfterHours);
+      if (review.needsConfirmation) {
+        setRequestError(priceChangeMessage(review.total));
+        return;
+      }
+      validatedBooking.quotedAfterHours = freshAfterHours;
+    }
     setSendingRequest(true);
 
     try {
@@ -580,6 +570,14 @@ useEffect(() => {
       const data = await response.json();
 
       if (!response.ok) {
+        if (data.errorCode === 'pickup_hours_changed' && typeof data.afterHours === 'boolean') {
+          const serverTime = Date.parse(data.evaluatedAt);
+          if (Number.isFinite(serverTime)) serverClockOffset.current = serverTime - Date.now();
+          setAsapAfterHours(data.afterHours);
+          const updatedTotal = calculateTowPrice({ billedMiles: route?.billedMiles, vehicle, rolls, afterHours: data.afterHours });
+          setRequestError(priceChangeMessage(updatedTotal));
+          return;
+        }
         if (data.errorCode) {
           setRequestError(data.error);
           return;
