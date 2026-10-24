@@ -1,5 +1,6 @@
 
 export const metadata = {
+  alternates: { canonical: "https://www.towtruckondemand.com/terms" },
   title: "Terms & Conditions | TowTruckOnDemand",
   description: "Terms and Conditions for TowTruckOnDemand.",
 };

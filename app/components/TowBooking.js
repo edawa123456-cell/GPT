@@ -1,5 +1,8 @@
 'use client';
 
+import SiteMenu from './SiteMenu';
+import SiteFooter from './SiteFooter';
+import HomeDiscover from './HomeDiscover';
 import { centralNow, isAfterHoursCentral } from '../lib/bookingTiming';
 import { calculateTowPrice, reviewTowPrice, HOOKUP_FEE, PER_MILE, MINIMUM_CHARGE, VEHICLE_SURCHARGE, NON_ROLLING_SURCHARGE, AFTER_HOURS_SURCHARGE } from '../lib/bookingPrice';
 import { BookingValidationError, validateBooking, validationMessage } from '../lib/bookingValidation';
@@ -606,6 +609,7 @@ if (typeof window !== 'undefined' && window.gtag) {
 
   return (
     <main lang={locale}>
+      <a className="skipLink" href="#booking">{isSpanish ? "Ir al formulario" : "Skip to quote form"}</a>
       <header className="nav">
    <a href={isSpanish ? "/es" : "/"} className="brand">
   <span className="brandTop">
@@ -616,7 +620,8 @@ if (typeof window !== 'undefined' && window.gtag) {
     OnDemand
   </span>
 </a>
-        <a href={languageHref} hrefLang={isSpanish ? "en" : "es"} className="callLink" style={{ marginLeft: "auto", marginRight: 18 }}>{isSpanish ? "English" : "Español"}</a>
+        <SiteMenu locale={locale} />
+        <a href={languageHref} hrefLang={isSpanish ? "en" : "es"} className="callLink languageLink">{isSpanish ? "English" : "Español"}</a>
         <a
           className="callLink"
           href="tel:+12108062061"
@@ -643,7 +648,7 @@ if (typeof window !== 'undefined' && window.gtag) {
           </div>
         </div>
 
-        <div className="bookingCard">
+        <div className="bookingCard" id="booking">
 
           {!booked ? (
             <form onSubmit={getQuote}>
@@ -1259,16 +1264,8 @@ if (typeof window !== 'undefined' && window.gtag) {
       </section>
 
     
-<footer>
-  <div>
-    © {new Date().getFullYear()} Tow Truck On Demand
-  </div>
-  <div style={{ marginTop: 10 }}>
-    <a href="/privacy-policy">{t("Privacy Policy")}</a>
-    <span style={{ margin: "0 12px" }}>|</span>
-    <a href="/terms">{t("Terms & Conditions")}</a>
-  </div>
-</footer>
+<HomeDiscover locale={locale} />
+<SiteFooter locale={locale} />
 
 
     </main>

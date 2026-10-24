@@ -12,7 +12,9 @@ const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 const timingUrl = url(await read('app/lib/bookingTiming.js'));
 const timing = await import(timingUrl);
 const validation = await import(url((await read('app/lib/bookingValidation.js')).replace("'./bookingTiming'", JSON.stringify(timingUrl))));
-const price = await import(url(await read('app/lib/bookingPrice.js')));
+const priceUrl = url(await read('app/lib/bookingPrice.js'));
+const price = await import(priceUrl);
+const siteContent = await import(url((await read('app/lib/siteContent.js')).replace("'./bookingPrice'", JSON.stringify(priceUrl))));
 const spanish = await import(url(await read('app/components/spanish.js')));
 const source = process.env.TTOD_RENDER_SOURCE
   ? await readFile(process.env.TTOD_RENDER_SOURCE, 'utf8')
@@ -24,6 +26,27 @@ const compiled = transformSync(source, {
   jsc: { parser: { syntax: 'ecmascript', jsx: true }, transform: { react: { runtime: 'automatic' } }, target: 'es2022' },
   module: { type: 'commonjs' },
 }).code;
+
+function loadUiModule(text, imports) {
+  const output = transformSync(text, {
+    filename: 'Component.jsx',
+    jsc: { parser: { syntax: 'ecmascript', jsx: true }, transform: { react: { runtime: 'automatic' } }, target: 'es2022' },
+    module: { type: 'commonjs' },
+  }).code;
+  const module = { exports: {} };
+  new Function('require', 'module', 'exports', output)(name => {
+    if (!Object.hasOwn(imports, name)) throw new Error(`Unexpected import: ${name}`);
+    return imports[name];
+  }, module, module.exports);
+  return module.exports;
+}
+const sharedImports = { 'react/jsx-runtime': require('react/jsx-runtime'), '../lib/siteContent': siteContent };
+const siteMenu = loadUiModule(await read('app/components/SiteMenu.js'), sharedImports);
+const siteFooter = loadUiModule(await read('app/components/SiteFooter.js'), sharedImports);
+const homeDiscover = loadUiModule(await read('app/components/HomeDiscover.js'), sharedImports);
+const informationPage = loadUiModule(await read('app/components/InformationPage.js'), {
+  ...sharedImports, './SiteMenu': siteMenu, './SiteFooter': siteFooter,
+});
 
 function renderBooking(overrides, locale) {
   let stateIndex = 0;
@@ -38,7 +61,8 @@ function renderBooking(overrides, locale) {
     react: hooks, 'react/jsx-runtime': require('react/jsx-runtime'),
     '../lib/bookingTiming': timing, '../lib/bookingValidation': validation,
     '../lib/bookingPrice': price, './spanish': spanish,
-    './PickupPinMap': { default: () => null },
+    './PickupPinMap': { __esModule: true, default: () => null },
+    './SiteMenu': siteMenu, './SiteFooter': siteFooter, './HomeDiscover': homeDiscover,
   };
   const module = { exports: {} };
   new Function('require', 'module', 'exports', compiled)(name => {
@@ -72,4 +96,16 @@ for (const locale of ['en', 'es']) {
     assert.ok(receipt.includes(locale === 'es' ? 'Solicitud recibida' : 'Tow request received'));
     assert.ok(receipt.includes(locale === 'es' ? 'antes de enviar la grúa' : 'before dispatch'));
   });
+}
+
+for (const locale of ['en', 'es']) {
+  for (const slug of siteContent.PAGE_SLUGS) {
+    test(`${locale} ${slug}: information page renders with useful links and a quote CTA`, () => {
+      const html = renderToStaticMarkup(React.createElement(informationPage.default, { slug, locale }));
+      assert.ok(html.includes(siteContent.pages[slug][locale].heading.replaceAll('&', '&amp;')));
+      assert.ok(html.includes(`href="${siteContent.sitePath('', locale)}#booking"`));
+      assert.ok(html.includes('tel:+12108062061'));
+      assert.ok(!html.includes('href="#"'));
+    });
+  }
 }
