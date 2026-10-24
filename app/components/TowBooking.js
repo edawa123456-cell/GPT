@@ -1,7 +1,7 @@
 'use client';
 
 import { centralNow, isAfterHoursCentral } from '../lib/bookingTiming';
-import { calculateTowPrice, reviewTowPrice, HOOKUP_FEE, PER_MILE, VEHICLE_SURCHARGE, NON_ROLLING_SURCHARGE, AFTER_HOURS_SURCHARGE } from '../lib/bookingPrice';
+import { calculateTowPrice, reviewTowPrice, HOOKUP_FEE, PER_MILE, MINIMUM_CHARGE, VEHICLE_SURCHARGE, NON_ROLLING_SURCHARGE, AFTER_HOURS_SURCHARGE } from '../lib/bookingPrice';
 import { BookingValidationError, validateBooking, validationMessage } from '../lib/bookingValidation';
 import PickupPinMap from './PickupPinMap';
 import { SPANISH } from './spanish';
