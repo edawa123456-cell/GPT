@@ -1068,6 +1068,8 @@ if (typeof window !== 'undefined' && window.gtag) {
                 <p style={{ fontSize: 11, opacity: 0.75, margin: '6px 0 0 27px', lineHeight: 1.5 }}>{t("TowTruckOnDemand: One confirmation text per request. Msg & data rates may apply. Reply STOP to opt out or HELP for help.")}</p>
               </div>
 
+              <p className="finePrint">{t("Pay at pickup: cash, card, Zelle or Cash App.")}</p>
+
               <button
                 className="primary"
                 type="submit"
@@ -1092,7 +1094,6 @@ if (typeof window !== 'undefined' && window.gtag) {
                 }
               >{t("\u2190 BACK TO QUOTE")}</button>
 
-              <p className="finePrint">{t("We may call or text you if we need more information about the tow.")}</p>
 
             </form>
 
@@ -1106,9 +1107,19 @@ if (typeof window !== 'undefined' && window.gtag) {
 
               <h2>{t("Tow request received")}</h2>
 
-              <p>{t("Your tow request has been received. We may call or text you if we need more information.")}</p>
+              <p>{t("We’ll contact you to confirm availability and pickup time before dispatch.")}</p>
 
               <div className="summary">
+
+                <div>
+                  <span>{isSpanish ? 'Horario · hora del centro' : 'Timing · Central Time'}</span>
+
+                  <strong>
+                    {timing === 'ASAP'
+                      ? t("ASAP")
+                      : `${scheduledDate} ${scheduledTime}`}
+                  </strong>
+                </div>
 
                 <div>
                   <span>{t("Name")}</span>
@@ -1166,16 +1177,6 @@ if (typeof window !== 'undefined' && window.gtag) {
                   <span>{t("Rolls")}</span>
                   <strong>
                     {t(rolls)}
-                  </strong>
-                </div>
-
-                <div>
-                  <span>{isSpanish ? 'Horario · hora del centro' : 'Timing · Central Time'}</span>
-
-                  <strong>
-                    {timing === 'ASAP'
-                      ? t("ASAP")
-                      : `${scheduledDate} ${scheduledTime}`}
                   </strong>
                 </div>
 
