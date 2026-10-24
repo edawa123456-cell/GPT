@@ -1,5 +1,6 @@
 
 export const metadata = {
+  alternates: { canonical: "https://www.towtruckondemand.com/privacy-policy" },
   title: "Privacy Policy | TowTruckOnDemand",
   description: "Privacy Policy for TowTruckOnDemand towing services.",
 };
