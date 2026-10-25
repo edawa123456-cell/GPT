@@ -624,7 +624,7 @@ useEffect(() => {
       bookingEvent('generate_lead');
 try { if (typeof window !== 'undefined' && window.gtag) {
   window.gtag('event', 'conversion', {
-    send_to: 'AW-18487849737/r7DCCNP3jY0dEInm2o9E',
+    send_to: 'AW-18487849737/r7DCCNP3jY0dEInm2O9E',
     value: 1.0,
     currency: 'USD',
   });

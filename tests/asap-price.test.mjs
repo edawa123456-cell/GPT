@@ -40,8 +40,9 @@ const component = await source('app/components/TowBooking.js');
 const submitSource = component.slice(component.indexOf('  async function submitTowRequest(e) {'), component.indexOf('\n  return (\n    <main'));
 const messageSource = component.slice(component.indexOf('  function priceChangeMessage(total) {'), component.indexOf('\n  const [route, setRoute]'));
 function clientHarness({ quote = 150, freshAfterHours = true, spanish = false, response } = {}) {
-  const state = { calls: 0, error: '', submitted: false, afterHours: false, sending: false, events: [] };
+  const state = { calls: 0, error: '', submitted: false, afterHours: false, sending: false, events: [], adsEvents: [] };
   const env = {
+    window: { gtag: (...args) => state.adsEvents.push(args) },
     timing: 'ASAP', route: { billedMiles: 10 }, vehicle: 'Sedan', rolls: 'Yes', quote,
     isSpanish: spanish, locale: spanish ? 'es' : 'en', serverClockOffset: { current: 0 },
     currentAsapHours: () => freshAfterHours, calculateTowPrice, reviewTowPrice,
@@ -65,7 +66,11 @@ test('customer sees changed total without submission, then explicitly accepts by
   const confirmation = clientHarness({ quote: 210 }); await confirmation.submit();
   assert.equal(confirmation.state.calls, 1); assert.equal(confirmation.state.payload.total, 210);
   assert.deepEqual(confirmation.state.events, ['booking_attempt', 'generate_lead']);
+  assert.deepEqual(confirmation.state.adsEvents, [['event', 'conversion', {
+    send_to: 'AW-18487849737/r7DCCNP3jY0dEInm2O9E', value: 1.0, currency: 'USD',
+  }]]);
   assert.deepEqual(first.state.events, []);
+  assert.deepEqual(first.state.adsEvents, []);
   assert.equal(confirmation.state.payload.quotedAfterHours, true); assert.equal(confirmation.state.submitted, true);
   const spanish = clientHarness({ spanish: true }); await spanish.submit();
   assert.match(spanish.state.error, /\$210/); assert.match(spanish.state.error, /Todavía no se ha enviado/);
@@ -77,6 +82,7 @@ test('server boundary conflict updates displayed price and clock without sending
   assert.equal(client.state.afterHours, true); assert.match(client.state.error, /\$210/);
   assert.equal(client.state.sending, false);
   assert.equal(client.state.events.includes('generate_lead'), false);
+  assert.deepEqual(client.state.adsEvents, []);
 });
 
 const RealDate = Date;
