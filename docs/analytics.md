@@ -1,6 +1,6 @@
 # TowTruckOnDemand analytics
 
-Uses the existing GA4 stream `G-98RWTRMG0V`. No new analytics provider or subscription is added. The existing Google Ads conversion remains separate and fires only after a successful request response.
+Uses the existing GA4 stream `G-98RWTMRG0V`. No new analytics provider or subscription is added. The existing Google Ads conversion remains separate and fires only after a successful request response.
 
 ## Booking funnel
 
@@ -21,7 +21,7 @@ Custom events go only to GA4, not the Ads destination. Allowlisted event paramet
 
 ## Dashboard setup still required
 
-Use the Google account with access to this measurement ID. The accounts visible in the current browser did not expose this property; do not create a duplicate property or replace the measurement ID without confirming ownership.
+Use the Google account with access to this measurement ID. Verified account: towtruckondemand@gmail.com; Analytics account 411909376, property 558850937 (TowTruckOnDemand Website). The previous ID had two letters transposed and was corrected after checking the live property's ID.
 
 1. Verify the data stream's measurement ID, Realtime and DebugView.
 2. Mark `generate_lead` as a key event (once per event). Do not also import it into Ads as another primary conversion alongside the existing Ads request conversion, which would double-count bookings.

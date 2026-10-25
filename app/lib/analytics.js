@@ -1,4 +1,4 @@
-export const ANALYTICS_ID = 'G-98RWTRMG0V';
+export const ANALYTICS_ID = 'G-98RWTMRG0V';
 
 const EVENTS = new Set(['quote_start', 'quote_request', 'quote_view', 'quote_error', 'booking_start', 'booking_attempt', 'booking_error', 'generate_lead', 'phone_click', 'social_click', 'content_scroll']);
 const PARTNERS = new Set(['Direct', 'Jo Towing', 'Xpress Towing', 'J-Jasmine Towing', 'Jasmine Towing']);

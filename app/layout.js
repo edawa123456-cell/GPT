@@ -1,5 +1,6 @@
 import './globals.css';
 import Script from 'next/script';
+import { ANALYTICS_ID } from './lib/analytics';
 import AnalyticsEvents from './components/AnalyticsEvents';
 import { SITE_URL, PHONE_HREF, SOCIAL_LINKS } from './lib/siteContent';
 
@@ -35,7 +36,7 @@ export default function RootLayout({ children }) {
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
           gtag('config', 'AW-18487849737');
-          gtag('config', 'G-98RWTRMG0V');
+          gtag('config', '${ANALYTICS_ID}');
         `}
       </Script>
     </html>
