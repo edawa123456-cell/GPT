@@ -377,16 +377,37 @@ export default function TowBooking({ locale = "en" }) {
 useEffect(() => {
   const params = new URLSearchParams(window.location.search);
   const ref = params.get('ref');
+  const partner = ref && Object.hasOwn(REFERRAL_PARTNERS, ref) ? REFERRAL_PARTNERS[ref] : null;
+  const storageKey = 'towReferralVisit';
+  let source = partner || 'Direct';
 
-  if (ref && REFERRAL_PARTNERS[ref]) {
-    setLeadSource(REFERRAL_PARTNERS[ref]);
-    localStorage.setItem('towReferralSource', REFERRAL_PARTNERS[ref]);
-  } else {
-    const savedSource = localStorage.getItem('towReferralSource');
-    if (savedSource) {
-      setLeadSource(savedSource);
+  // Retire the old permanent attribution, including previously saved test links.
+  try { window.localStorage.removeItem('towReferralSource'); } catch {}
+
+  try {
+    const now = Date.now();
+    const navigationType = window.performance.getEntriesByType('navigation')[0]?.type;
+    let internalNavigation = false;
+    try { internalNavigation = new URL(document.referrer).origin === window.location.origin; } catch {}
+    const continuingVisit = internalNavigation || navigationType === 'reload' || navigationType === 'back_forward';
+
+    if (partner) {
+      window.sessionStorage.setItem(storageKey, JSON.stringify({ ref, expiresAt: now + 30 * 60 * 1000 }));
+    } else if (!params.has('ref') && continuingVisit) {
+      const saved = JSON.parse(window.sessionStorage.getItem(storageKey) || 'null');
+      if (saved && Object.hasOwn(REFERRAL_PARTNERS, saved.ref) && Number.isFinite(saved.expiresAt) && saved.expiresAt > now) {
+        source = REFERRAL_PARTNERS[saved.ref];
+      } else {
+        window.sessionStorage.removeItem(storageKey);
+      }
+    } else {
+      window.sessionStorage.removeItem(storageKey);
     }
+  } catch {
+    // Booking still works when browser storage is unavailable or contains invalid data.
+    try { window.sessionStorage.removeItem(storageKey); } catch {}
   }
+  setLeadSource(source);
 }, []);
   useEffect(() => {
     let active = true;
