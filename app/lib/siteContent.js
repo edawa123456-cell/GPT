@@ -4,7 +4,7 @@ export const SITE_URL = 'https://www.towtruckondemand.com';
 export const PHONE = '(210) 806-2061';
 export const PHONE_HREF = 'tel:+12108062061';
 // Add only owner-confirmed TowTruckOnDemand profile URLs. Empty means no dead social links.
-export const SOCIAL_LINKS = [{ name: 'Facebook', url: 'https://www.facebook.com/TowTruckOnDemand' }];
+export const SOCIAL_LINKS = [{ name: 'Facebook', url: 'https://www.facebook.com/TowTruckOnDemand' }, { name: 'Instagram', url: 'https://www.instagram.com/towtruckondemand/' }];
 export const PAGE_SLUGS = ['services', 'pricing', 'faq', 'towing-guide', 'about', 'contact'];
 export const sitePath = (slug = '', locale = 'en') => `${locale === 'es' ? '/es' : ''}/${slug}`.replace(/\/$/, '') || '/';
 
