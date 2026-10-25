@@ -61,6 +61,7 @@ function renderBooking(overrides, locale) {
     react: hooks, 'react/jsx-runtime': require('react/jsx-runtime'),
     '../lib/bookingTiming': timing, '../lib/bookingValidation': validation,
     '../lib/bookingPrice': price, './spanish': spanish,
+    '../lib/analytics': { trackEvent() {} },
     './PickupPinMap': { __esModule: true, default: () => null },
     './SiteMenu': siteMenu, './SiteFooter': siteFooter, './HomeDiscover': homeDiscover,
   };

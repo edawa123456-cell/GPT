@@ -1,6 +1,7 @@
 'use client';
 
 import SiteMenu from './SiteMenu';
+import { trackEvent } from '../lib/analytics';
 import SiteFooter from './SiteFooter';
 import HomeDiscover from './HomeDiscover';
 import { centralNow, isAfterHoursCentral } from '../lib/bookingTiming';
@@ -482,6 +483,10 @@ useEffect(() => {
     return validateBooking(bookingInput(), { requireContact }).booking;
   }
 
+  function bookingEvent(name) {
+    trackEvent(name, { language: locale, timing, vehicle, leadSource });
+  }
+
   async function getQuote(e) {
     e.preventDefault();
 
@@ -502,6 +507,7 @@ useEffect(() => {
       return;
     }
 
+    bookingEvent('quote_request');
     setLoadingRoute(true);
 
     try {
@@ -537,6 +543,7 @@ useEffect(() => {
           return;
         }
         if (data.errorCode) {
+          bookingEvent('quote_error');
           setRouteError(data.error);
           return;
         }
@@ -549,7 +556,9 @@ useEffect(() => {
       setRoute(data);
       if (timing === 'ASAP') setAsapAfterHours(currentAsapHours());
       setShowQuote(true);
+      bookingEvent('quote_view');
     } catch (error) {
+      bookingEvent('quote_error');
       setRouteError(
         isSpanish ? t(error?.message) === error?.message ? t("Could not calculate route.") : t(error?.message) : error?.message || "Could not calculate route."
       );
@@ -580,6 +589,7 @@ useEffect(() => {
       }
       validatedBooking.quotedAfterHours = freshAfterHours;
     }
+    bookingEvent('booking_attempt');
     setSendingRequest(true);
 
     try {
@@ -603,6 +613,7 @@ useEffect(() => {
           return;
         }
         if (data.errorCode) {
+          bookingEvent('booking_error');
           setRequestError(data.error);
           return;
         }
@@ -610,15 +621,17 @@ useEffect(() => {
           data.error || 'Could not send your tow request.'
         );
       }
-if (typeof window !== 'undefined' && window.gtag) {
+      bookingEvent('generate_lead');
+try { if (typeof window !== 'undefined' && window.gtag) {
   window.gtag('event', 'conversion', {
     send_to: 'AW-18487849737/r7DCCNP3jY0dEInm2o9E',
     value: 1.0,
     currency: 'USD',
   });
-}
+} } catch { /* Advertising measurement must not interrupt the confirmation. */ }
       setRequestSubmitted(true);
     } catch (error) {
+      bookingEvent('booking_error');
       console.error('Tow request submission error:', error);
       setRequestError(
         isSpanish ? t("Could not send your tow request. Please try again.") : error?.message || "Could not send your tow request. Please try again."
@@ -904,6 +917,7 @@ if (typeof window !== 'undefined' && window.gtag) {
                           }
                           setRequestSubmitted(false);
                           setBooked(true);
+                          bookingEvent('booking_start');
                         }}
                       >{t("BOOK THIS TOW")}</button>
 

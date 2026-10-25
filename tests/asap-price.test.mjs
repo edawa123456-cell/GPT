@@ -40,11 +40,12 @@ const component = await source('app/components/TowBooking.js');
 const submitSource = component.slice(component.indexOf('  async function submitTowRequest(e) {'), component.indexOf('\n  return (\n    <main'));
 const messageSource = component.slice(component.indexOf('  function priceChangeMessage(total) {'), component.indexOf('\n  const [route, setRoute]'));
 function clientHarness({ quote = 150, freshAfterHours = true, spanish = false, response } = {}) {
-  const state = { calls: 0, error: '', submitted: false, afterHours: false, sending: false };
+  const state = { calls: 0, error: '', submitted: false, afterHours: false, sending: false, events: [] };
   const env = {
     timing: 'ASAP', route: { billedMiles: 10 }, vehicle: 'Sedan', rolls: 'Yes', quote,
     isSpanish: spanish, locale: spanish ? 'es' : 'en', serverClockOffset: { current: 0 },
     currentAsapHours: () => freshAfterHours, calculateTowPrice, reviewTowPrice,
+    bookingEvent: name => state.events.push(name),
     checkBooking: () => ({ total: quote }), BookingValidationError: class extends Error {},
     validationMessage: () => '', setRequestError: value => { state.error = value; },
     setAsapAfterHours: value => { state.afterHours = value; },
@@ -63,6 +64,8 @@ test('customer sees changed total without submission, then explicitly accepts by
   assert.match(first.state.error, /has not been sent/);
   const confirmation = clientHarness({ quote: 210 }); await confirmation.submit();
   assert.equal(confirmation.state.calls, 1); assert.equal(confirmation.state.payload.total, 210);
+  assert.deepEqual(confirmation.state.events, ['booking_attempt', 'generate_lead']);
+  assert.deepEqual(first.state.events, []);
   assert.equal(confirmation.state.payload.quotedAfterHours, true); assert.equal(confirmation.state.submitted, true);
   const spanish = clientHarness({ spanish: true }); await spanish.submit();
   assert.match(spanish.state.error, /\$210/); assert.match(spanish.state.error, /Todavía no se ha enviado/);
@@ -73,6 +76,7 @@ test('server boundary conflict updates displayed price and clock without sending
   assert.equal(client.state.calls, 1); assert.equal(client.state.submitted, false);
   assert.equal(client.state.afterHours, true); assert.match(client.state.error, /\$210/);
   assert.equal(client.state.sending, false);
+  assert.equal(client.state.events.includes('generate_lead'), false);
 });
 
 const RealDate = Date;

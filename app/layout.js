@@ -1,5 +1,6 @@
 import './globals.css';
 import Script from 'next/script';
+import AnalyticsEvents from './components/AnalyticsEvents';
 import { SITE_URL, PHONE_HREF, SOCIAL_LINKS } from './lib/siteContent';
 
 export const metadata = {
@@ -13,7 +14,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>{children}
+      <body>{children}<AnalyticsEvents />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
           '@context': 'https://schema.org', '@type': 'Organization',
           name: 'TowTruckOnDemand', url: SITE_URL,
