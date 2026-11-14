@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function PartnerLocationLinks() {
   const [number, setNumber] = useState('');
@@ -8,7 +8,9 @@ export default function PartnerLocationLinks() {
   const [copied, setCopied] = useState(false);
   const digits = number.replace(/\D/g, '');
   const phone = digits.length === 10 ? '+1' + digits : (digits.length === 11 && digits.startsWith('1') ? '+' + digits : '');
-  const url = phone ? 'https://www.towtruckondemand.com/locate?to=' + encodeURIComponent(phone) + (locale === 'es' ? '&lang=es' : '') : '';
+  const [siteOrigin, setSiteOrigin] = useState('');
+  useEffect(() => { setSiteOrigin(window.location.origin); }, []);
+  const url = phone && siteOrigin ? siteOrigin + '/locate?to=' + encodeURIComponent(phone) + (locale === 'es' ? '&lang=es' : '') : '';
 
   async function copy() {
     if (!url) return;
