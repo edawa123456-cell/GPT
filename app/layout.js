@@ -1,6 +1,6 @@
 import './globals.css';
 import Script from 'next/script';
-import { ANALYTICS_ID } from './lib/analytics';
+import { initializeGoogleTracking } from './lib/analytics';
 import AnalyticsEvents from './components/AnalyticsEvents';
 import { SITE_URL, PHONE_HREF, SOCIAL_LINKS } from './lib/siteContent';
 
@@ -25,19 +25,8 @@ export default function RootLayout({ children }) {
         }).replace(/</g, '\\u003c') }} />
       </body>
 
-      <Script
-        src="https://www.googletagmanager.com/gtag/js?id=AW-18487849737"
-        strategy="afterInteractive"
-      />
-
       <Script id="google-ads-tag" strategy="afterInteractive">
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'AW-18487849737');
-          gtag('config', '${ANALYTICS_ID}');
-        `}
+        {`(${initializeGoogleTracking.toString()})();`}
       </Script>
     </html>
   );

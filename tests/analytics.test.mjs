@@ -3,7 +3,34 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const source = await readFile(new URL('../app/lib/analytics.js', import.meta.url), 'utf8');
-const { analyticsParameters, trackEvent } = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
+const { analyticsParameters, trackEvent, initializeGoogleTracking, isTrackingExcluded } = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
+
+test('excluded browsers never load Google tags or queue funnel events', () => {
+  const scripts = [];
+  globalThis.document = { createElement: () => ({}), head: { appendChild: s => scripts.push(s) } };
+  globalThis.window = { location: { pathname: '/es' }, localStorage: { getItem: () => '1' } };
+  try {
+    initializeGoogleTracking();
+    assert.equal(isTrackingExcluded(), true);
+    assert.equal(trackEvent('generate_lead'), false);
+    assert.equal(window.dataLayer, undefined);
+    assert.deepEqual(scripts, []);
+    window.location.pathname = '/tracking-control';
+    window.localStorage.getItem = () => null;
+    initializeGoogleTracking();
+    assert.deepEqual(scripts, []);
+    assert.equal(trackEvent('quote_start'), false);
+    window.location.pathname = '/';
+    // Execute precisely the standalone function that the layout serializes.
+    new Function(`(${initializeGoogleTracking.toString()})()`)();
+    assert.equal(scripts.length, 1);
+    assert.match(scripts[0].src, /AW-18487849737$/);
+    assert.deepEqual(window.dataLayer.slice(1).map(args => Array.from(args)), [
+      ['config', 'AW-18487849737'], ['config', 'G-98RWTMRG0V'],
+    ]);
+    assert.equal(trackEvent('generate_lead'), true);
+  } finally { delete globalThis.window; delete globalThis.document; }
+});
 
 test('analytics drops customer data, coordinates, URLs and arbitrary error details', () => {
   assert.deepEqual(analyticsParameters({ language: 'es', timing: 'Schedule for later', vehicle: 'SUV', leadSource: 'Jo Towing',

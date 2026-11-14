@@ -1,7 +1,7 @@
 'use client';
 
 import SiteMenu from './SiteMenu';
-import { trackEvent } from '../lib/analytics';
+import { trackEvent, isTrackingExcluded } from '../lib/analytics';
 import SiteFooter from './SiteFooter';
 import HomeDiscover from './HomeDiscover';
 import { centralNow, isAfterHoursCentral } from '../lib/bookingTiming';
@@ -622,7 +622,7 @@ useEffect(() => {
         );
       }
       bookingEvent('generate_lead');
-try { if (typeof window !== 'undefined' && window.gtag) {
+try { if (!isTrackingExcluded() && typeof window !== 'undefined' && window.gtag) {
   window.gtag('event', 'conversion', {
     send_to: 'AW-18487849737/r7DCCNP3jY0dEInm2O9E',
     value: 1.0,

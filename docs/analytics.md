@@ -37,3 +37,7 @@ For incoming social traffic, set the website links on the business profiles to:
 These are incoming links for the social profiles, not the website's outgoing social buttons. Updating Facebook/Instagram profiles has not been performed. Partner links retain their existing `?ref=partner-slug` format; `referral_partner` supplements GA4 acquisition and does not rewrite GA4's source/medium.
 
 Ad blockers, browser restrictions and consent settings can limit analytics. Historical funnel events cannot be reconstructed. Do not send real bookings solely to test analytics without coordinating the test.
+
+## Exclude owner testing
+
+Open `/tracking-control` on the exact hostname and browser used for testing. Choose **Exclude my testing**, then reload other open site tabs. The preference persists in local storage (`ttod.excludeTracking=1`); the Google library/configuration and all custom funnel/Ads booking events are suppressed for that browser. The control page itself is not measured and is marked noindex. Normal customer browsers keep the existing GA4 and Ads destinations. Use **Restore normal tracking** to undo it. This is measurement exclusion only: submitting the booking form still sends a real request. Historical tests cannot be identified or removed automatically. Private windows, other devices/hostnames, and cleared browser storage need separate exclusion.

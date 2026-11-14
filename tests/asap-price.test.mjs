@@ -42,6 +42,7 @@ const messageSource = component.slice(component.indexOf('  function priceChangeM
 function clientHarness({ quote = 150, freshAfterHours = true, spanish = false, response } = {}) {
   const state = { calls: 0, error: '', submitted: false, afterHours: false, sending: false, events: [], adsEvents: [] };
   const env = {
+    isTrackingExcluded: () => false,
     window: { gtag: (...args) => state.adsEvents.push(args) },
     timing: 'ASAP', route: { billedMiles: 10 }, vehicle: 'Sedan', rolls: 'Yes', quote,
     isSpanish: spanish, locale: spanish ? 'es' : 'en', serverClockOffset: { current: 0 },
@@ -75,6 +76,15 @@ test('customer sees changed total without submission, then explicitly accepts by
   const spanish = clientHarness({ spanish: true }); await spanish.submit();
   assert.match(spanish.state.error, /\$210/); assert.match(spanish.state.error, /Todavía no se ha enviado/);
 });
+test('excluded test booking confirms successfully without an Ads conversion', async () => {
+  const client = clientHarness({ quote: 210 });
+  client.env.isTrackingExcluded = () => true;
+  await client.submit();
+  assert.equal(client.state.calls, 1);
+  assert.equal(client.state.submitted, true);
+  assert.deepEqual(client.state.adsEvents, []);
+});
+
 test('server boundary conflict updates displayed price and clock without sending a confirmation', async () => {
   const client = clientHarness({ freshAfterHours: false, response: Response.json({ errorCode: 'pickup_hours_changed', afterHours: true, evaluatedAt: new Date().toISOString() }, { status: 409 }) });
   await client.submit();
