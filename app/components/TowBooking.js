@@ -671,13 +671,13 @@ try { if (!isTrackingExcluded() && typeof window !== 'undefined' && window.gtag)
 </div>
         <div className="eyebrow">{t("SERVING DFW & SURROUNDING AREAS")}</div>
 
-          <h1>{t("Need a tow?")}</h1>
+          <h1>{isSpanish ? t("Need a tow?") : "Fort Worth & DFW towing"}</h1>
 
-          <p className="lede">{t("Enter your pickup and destination, see your price, and request service online.")}</p>
+          <p className="lede">{isSpanish ? t("Enter your pickup and destination, see your price, and request service online.") : "Flatbed towing in Fort Worth, Arlington and surrounding DFW areas. Enter your pickup and destination to see your price instantly, then request your tow online."}</p>
 
           <div className="trustRow">
             <span>{t("Upfront pricing")}</span>
-            <span>{t("Online booking")}</span>
+            <span>{isSpanish ? t("Online booking") : "Pay at pickup"}</span>
             <span>{t("Local trucks")}</span>
           </div>
         </div>
