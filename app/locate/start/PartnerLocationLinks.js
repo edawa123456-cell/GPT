@@ -8,9 +8,12 @@ export default function PartnerLocationLinks() {
   const [copied, setCopied] = useState(false);
   const digits = number.replace(/\D/g, '');
   const phone = digits.length === 10 ? '+1' + digits : (digits.length === 11 && digits.startsWith('1') ? '+' + digits : '');
-  const [siteOrigin, setSiteOrigin] = useState('');
-  useEffect(() => { setSiteOrigin(window.location.origin); }, []);
-  const url = phone && siteOrigin ? siteOrigin + '/locate?to=' + encodeURIComponent(phone) + (locale === 'es' ? '&lang=es' : '') : '';
+  const [previewOrigin, setPreviewOrigin] = useState('');
+  useEffect(() => { setPreviewOrigin(window.location.origin); }, []);
+  const suffix = phone ? '/locate?to=' + encodeURIComponent(phone) + (locale === 'es' ? '&lang=es' : '') : '';
+  const url = phone ? 'https://www.towtruckondemand.com' + suffix : '';
+  const previewUrl = phone && previewOrigin && previewOrigin !== 'https://www.towtruckondemand.com'
+    ? previewOrigin + suffix : '';
 
   async function copy() {
     if (!url) return;
@@ -34,8 +37,13 @@ export default function PartnerLocationLinks() {
           <strong>Customer link</strong>
           <p style={{ fontSize: 13, lineHeight: 1.5 }}>{url}</p>
           <button type="button" onClick={copy} style={{ width: '100%', padding: 14, background: '#075fe6', border: 0, borderRadius: 10, color: 'white', fontWeight: 800, cursor: 'pointer' }}>{copied ? 'Copied — paste into your SMS' : 'Copy customer link'}</button>
+          {previewUrl && <div style={{ marginTop: 16, padding: 12, border: '1px solid #d4e2f7', borderRadius: 10, background: '#f3f8ff' }}>
+            <strong style={{ fontSize: 13 }}>Testing only</strong>
+            <p style={{ fontSize: 12, lineHeight: 1.5 }}>The customer link above uses your main website, but it will not work until this feature is published there. To test the locator on this Vercel preview, use the temporary test link below:</p>
+            <a href={previewUrl} target="_blank" rel="noreferrer" style={{ color: '#075fe6', overflowWrap: 'anywhere', fontSize: 13 }}>Open customer locator preview</a>
+          </div>}
         </div> : <p style={{ color: '#657084', fontSize: 13, marginTop: 18 }}>Enter a valid 10-digit US mobile number to create the link.</p>}
-        <p style={{ color: '#657084', fontSize: 12, borderTop: '1px solid #e5eaf0', marginTop: 24, paddingTop: 14, lineHeight: 1.5 }}>The link contains the destination number and may be forwarded. This is an unlisted convenience tool, not password-protected partner access. Customers must confirm their pin and personally send the text.</p>
+        <p style={{ color: '#657084', fontSize: 12, borderTop: '1px solid #e5eaf0', marginTop: 24, paddingTop: 14, lineHeight: 1.5 }}>The link contains the destination number and may be forwarded. This partner generator requires an access code. The customer link itself can be forwarded and contains the destination number. Customers must confirm their pin and personally send the text.</p>
       </section>
     </main>
   );
