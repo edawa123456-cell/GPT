@@ -11,9 +11,11 @@ export default function PartnerLocationLinks() {
   const [previewOrigin, setPreviewOrigin] = useState('');
   useEffect(() => { setPreviewOrigin(window.location.origin); }, []);
   const suffix = phone ? '/locate?to=' + encodeURIComponent(phone) + (locale === 'es' ? '&lang=es' : '') : '';
-  const url = phone ? 'https://www.towtruckondemand.com' + suffix : '';
-  const previewUrl = phone && previewOrigin && previewOrigin !== 'https://www.towtruckondemand.com'
-    ? previewOrigin + suffix : '';
+  const isPreview = previewOrigin && previewOrigin !== 'https://www.towtruckondemand.com';
+  // Use the preview hostname already approved in Google Cloud for the Maps browser key.
+  const approvedPreviewOrigin = 'https://tow-truck-on-demand-7vcwj3nhi-towing.vercel.app';
+  const url = phone ? (isPreview ? approvedPreviewOrigin : 'https://www.towtruckondemand.com') + suffix : '';
+  const previewUrl = isPreview ? url : '';
 
   async function copy() {
     if (!url) return;
@@ -34,12 +36,12 @@ export default function PartnerLocationLinks() {
           <option value="es">Español</option>
         </select>
         {url ? <div style={{ marginTop: 18, overflowWrap: 'anywhere' }}>
-          <strong>Customer link</strong>
+          <strong>{isPreview ? 'TEST customer link — use this for testing' : 'Customer link'}</strong>
           <p style={{ fontSize: 13, lineHeight: 1.5 }}>{url}</p>
-          <button type="button" onClick={copy} style={{ width: '100%', padding: 14, background: '#075fe6', border: 0, borderRadius: 10, color: 'white', fontWeight: 800, cursor: 'pointer' }}>{copied ? 'Copied — paste into your SMS' : 'Copy customer link'}</button>
+          <button type="button" onClick={copy} style={{ width: '100%', padding: 14, background: '#075fe6', border: 0, borderRadius: 10, color: 'white', fontWeight: 800, cursor: 'pointer' }}>{copied ? 'Copied — paste into your SMS' : (isPreview ? 'Copy WORKING TEST link' : 'Copy customer link')}</button>
           {previewUrl && <div style={{ marginTop: 16, padding: 12, border: '1px solid #d4e2f7', borderRadius: 10, background: '#f3f8ff' }}>
             <strong style={{ fontSize: 13 }}>Testing only</strong>
-            <p style={{ fontSize: 12, lineHeight: 1.5 }}>The customer link above uses your main website, but it will not work until this feature is published there. To test the locator on this Vercel preview, use the temporary test link below:</p>
+            <p style={{ fontSize: 12, lineHeight: 1.5 }}>The blue Copy button now copies the working test link. It uses the Vercel test domain approved for Google Maps. Do not send a towtruckondemand.com/locate link until the feature is published to the live site.</p>
             <a href={previewUrl} target="_blank" rel="noreferrer" style={{ color: '#075fe6', overflowWrap: 'anywhere', fontSize: 13 }}>Open customer locator preview</a>
           </div>}
         </div> : <p style={{ color: '#657084', fontSize: 13, marginTop: 18 }}>Enter a valid 10-digit US mobile number to create the link.</p>}
