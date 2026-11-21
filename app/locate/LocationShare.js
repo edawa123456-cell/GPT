@@ -144,7 +144,7 @@ export default function LocationShare() {
         <h1 style={{ fontSize: 29, lineHeight: 1.15, marginTop: 24, marginBottom: 10 }}>{words.title}</h1>
         <p style={{ color: '#536072', lineHeight: 1.55 }}>{words.intro}</p>
         {phoneInvalid && <p role="alert" className="errorBox">{words.invalidPhone}</p>}
-        <button type="button" onClick={findLocation} disabled={busy} style={{ ...button, marginTop: 20 }}>{busy ? words.locating : words.locate}</button>
+        {!pin && <button type="button" onClick={findLocation} disabled={busy} style={{ ...button, marginTop: 20 }}>{busy ? words.locating : words.locate}</button>}
         {geoError && <p role="alert" className="errorBox">{geoError}</p>}
         {pin ? (
           <section aria-label={words.location} style={{ marginTop: 20 }}>
