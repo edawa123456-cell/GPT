@@ -72,9 +72,9 @@ export default function LocationShare() {
     title: 'Comparte tu ubicación', intro: '¿No sabes dónde estás? Comparte la ubicación exacta donde debe llegar la grúa.',
     locate: 'Usar mi ubicación actual', locating: 'Buscando tu ubicación…',
     adjust: 'Mueve el mapa para ajustar el pin al lugar correcto. Confirma el lado correcto de la carretera.',
-    send: 'Abrir mensaje de texto', copy: 'Copiar enlace de Google Maps', copied: 'Enlace copiado',
+    send: 'Enviar mi ubicación por SMS', copy: 'Copiar enlace de Google Maps', copied: 'Enlace copiado',
     waiting: 'Primero pulsa el botón de ubicación para encontrar tu vehículo.',
-    note: 'Tu ubicación solo se incluye en el mensaje que tú decidas enviar. Debes pulsar Enviar en tu aplicación de mensajes.',
+    note: 'Pulsa Enviar en Mensajes para compartir tu ubicación con el operador.',
     phone: 'El mensaje estará dirigido al número de tu operador.',
     noPhone: 'Selecciona el contacto de tu operador cuando se abra la aplicación de mensajes.',
     invalidPhone: 'El enlace del operador contiene un número no válido. Solicita otro enlace.',
@@ -87,9 +87,9 @@ export default function LocationShare() {
     title: 'Share your pickup location', intro: 'Not sure where you are? Share the exact spot where the tow truck should arrive.',
     locate: 'Use my current location', locating: 'Finding your location…',
     adjust: 'Move the map to adjust the pin to the correct pickup spot. Check the correct side of the road.',
-    send: 'Open text message', copy: 'Copy Google Maps link', copied: 'Link copied',
+    send: 'Text my location', copy: 'Copy Google Maps link', copied: 'Link copied',
     waiting: 'Tap the location button to find your vehicle first.',
-    note: 'Your location is included only in the message you choose to send. You must press Send in your messaging app.',
+    note: 'Tap Send in Messages to share your pickup pin with dispatch.',
     phone: 'The message will be addressed to your dispatcher.',
     noPhone: 'Select your dispatcher conversation when your messaging app opens.',
     invalidPhone: 'This dispatcher link contains an invalid phone number. Please request a new link.',
@@ -153,8 +153,8 @@ export default function LocationShare() {
             <p style={{ fontSize: 13, color: '#536072', overflowWrap: 'anywhere' }}>{pin.lat.toFixed(6)}, {pin.lng.toFixed(6)} {accuracy !== null && ' · GPS ±' + accuracy + ' m'}</p>
             <p style={{ fontSize: 13, lineHeight: 1.5 }}>{words.adjust}</p>
             <button type="button" onClick={openSms} disabled={phoneInvalid} style={{ ...button, marginTop: 18 }}>{words.send}</button>
+            <p style={{ fontSize: 12, color: '#536072', lineHeight: 1.55 }}>{words.note} {!phone && words.noPhone}</p>
             <button type="button" onClick={copyLink} style={{ ...secondary, marginTop: 10 }}>{copied ? words.copied : words.copy}</button>
-            <p style={{ fontSize: 12, color: '#536072', lineHeight: 1.55 }}>{words.note} {phone ? words.phone : words.noPhone}</p>
             {smsOpened && <p role="status" style={{ color: '#14633c', fontWeight: 700, fontSize: 13 }}>{words.open}</p>}
           </section>
         ) : <p style={{ fontSize: 13, color: '#657084', marginTop: 20 }}>{words.waiting}</p>}
