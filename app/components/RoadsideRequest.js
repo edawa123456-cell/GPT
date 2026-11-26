@@ -5,6 +5,7 @@ import SiteMenu from './SiteMenu';
 import SiteFooter from './SiteFooter';
 import { PHONE_HREF } from '../lib/siteContent';
 import { trackEvent } from '../lib/analytics';
+import { ROADSIDE_FLAT_PRICE } from '../lib/roadsidePrice';
 
 const SERVICES = [
   { id: 'jump_start', en: 'Jump-start', es: 'Paso de corriente', detailEn: 'For a vehicle with a discharged battery', detailEs: 'Para una batería descargada' },
@@ -17,17 +18,17 @@ const COPY = {
   en: {
     menu: 'Explore', call: 'Call us', eyebrow: 'ROADSIDE HELP THROUGHOUT DFW',
     title: 'Roadside assistance in Fort Worth & DFW',
-    intro: 'Dead battery, flat tire, locked keys or out of fuel? Tell us what happened and where you are. We will confirm your price and driver availability before dispatch.',
+    intro: 'Dead battery, flat tire, locked keys or out of fuel? Tell us what happened and where you are. Flat $50 service price. We will confirm driver availability before dispatch.',
     start: 'Request roadside assistance', service: 'What do you need help with?', location: 'Where is the vehicle?',
     locationPlaceholder: 'Street address, business or nearby intersection',
     gps: 'Use my current location', finding: 'Finding your location…', gpsFailed: 'Location unavailable. Enter an address instead.',
     name: 'Your name', namePlaceholder: 'Full name', phone: 'Mobile phone', phonePlaceholder: 'Phone number',
     vehicle: 'Vehicle make and model', vehiclePlaceholder: 'Example: Toyota Camry',
     notes: 'Helpful details (optional)', notesPlaceholder: 'Parking lot, tire location, fuel type, access details…',
-    request: 'REQUEST PRICE & AVAILABILITY', sending: 'SENDING REQUEST…',
-    priceTitle: 'How pricing works', priceCopy: 'Roadside assistance rates are not yet published online. We will confirm the service price with you before sending a driver. No online payment is required to request assistance.',
-    note: 'Request only — no driver is dispatched until we confirm availability and price with you.',
-    received: 'Roadside request received', receivedInfo: 'We will contact you to confirm the service price, availability and next steps. Your request is not yet a confirmed dispatch.',
+    request: 'REQUEST ROADSIDE ASSISTANCE — $50', sending: 'SENDING REQUEST…',
+    priceTitle: 'Flat roadside service price', priceCopy: 'All four listed services are $50 each. No online payment is needed to send a request. We will confirm availability before dispatch.',
+    note: 'Request only — we will confirm service availability before dispatch. Any additional work will be discussed first.',
+    received: 'Roadside request received', receivedInfo: 'Your $50 roadside assistance request was received. We will contact you to confirm driver availability. This is not yet a confirmed dispatch.',
     another: 'Request another service', callHelp: 'Prefer to speak with dispatch?', serviceArea: 'Fort Worth, Arlington and surrounding DFW areas. Availability varies by location.',
     noGuarantee: 'For emergencies involving injury or immediate danger, call 911.', backTow: 'Need a tow instead?', towLink: 'Get an instant towing price',
     invalidService: 'Choose a roadside service.', error: 'We could not send your request. Please try again or call us.',
@@ -36,17 +37,17 @@ const COPY = {
   es: {
     menu: 'Explorar', call: 'Llámanos', eyebrow: 'ASISTENCIA EN CARRETERA EN DFW',
     title: 'Asistencia en carretera en Fort Worth y DFW',
-    intro: '¿Batería descargada, llanta ponchada, llaves dentro del auto o sin gasolina? Dinos qué pasó y dónde estás. Confirmaremos el precio y la disponibilidad antes de enviar ayuda.',
+    intro: '¿Batería descargada, llanta ponchada, llaves dentro del auto o sin gasolina? Dinos qué pasó y dónde estás. Tarifa fija de $50 por servicio. Confirmaremos la disponibilidad antes de enviar ayuda.',
     start: 'Solicitar asistencia', service: '¿Qué servicio necesitas?', location: '¿Dónde está el vehículo?',
     locationPlaceholder: 'Dirección, negocio o intersección cercana',
     gps: 'Usar mi ubicación actual', finding: 'Buscando tu ubicación…', gpsFailed: 'No se pudo obtener tu ubicación. Escribe una dirección.',
     name: 'Tu nombre', namePlaceholder: 'Nombre completo', phone: 'Número de celular', phonePlaceholder: 'Número de teléfono',
     vehicle: 'Marca y modelo del vehículo', vehiclePlaceholder: 'Ejemplo: Toyota Camry',
     notes: 'Detalles útiles (opcional)', notesPlaceholder: 'Estacionamiento, llanta dañada, tipo de combustible, acceso…',
-    request: 'CONSULTAR PRECIO Y DISPONIBILIDAD', sending: 'ENVIANDO SOLICITUD…',
-    priceTitle: 'Cómo funcionan los precios', priceCopy: 'Las tarifas de asistencia aún no se publican en línea. Confirmaremos el precio contigo antes de enviar un conductor. No necesitas pagar en línea para solicitar ayuda.',
-    note: 'Solo solicitud: no enviamos un conductor hasta confirmar disponibilidad y precio contigo.',
-    received: 'Solicitud de asistencia recibida', receivedInfo: 'Te contactaremos para confirmar el precio, la disponibilidad y los próximos pasos. Todavía no se ha confirmado el envío de ayuda.',
+    request: 'SOLICITAR ASISTENCIA — $50', sending: 'ENVIANDO SOLICITUD…',
+    priceTitle: 'Precio fijo del servicio', priceCopy: 'Cada uno de los cuatro servicios cuesta $50. No necesitas pagar en línea para enviar una solicitud. Confirmaremos disponibilidad antes de enviar ayuda.',
+    note: 'Solo solicitud: confirmaremos disponibilidad antes de enviar ayuda. Hablaremos contigo antes de cualquier trabajo adicional.',
+    received: 'Solicitud de asistencia recibida', receivedInfo: 'Recibimos tu solicitud de asistencia por $50. Te contactaremos para confirmar disponibilidad. Todavía no se ha confirmado el envío de ayuda.',
     another: 'Solicitar otro servicio', callHelp: '¿Prefieres hablar con nosotros?', serviceArea: 'Fort Worth, Arlington y zonas cercanas de DFW. La disponibilidad depende del lugar.',
     noGuarantee: 'En caso de lesiones o peligro inmediato, llama al 911.', backTow: '¿Necesitas una grúa?', towLink: 'Cotiza una grúa al instante',
     invalidService: 'Selecciona un servicio.', error: 'No se pudo enviar tu solicitud. Inténtalo otra vez o llámanos.',
@@ -165,7 +166,7 @@ export default function RoadsideRequest({ locale = 'en' }) {
               <textarea id="roadside-notes" value={notes} onChange={e => setNotes(e.target.value)} placeholder={t.notesPlaceholder} maxLength={500} rows={2} />
 
               <div className="roadsidePriceNotice">
-                <strong>{t.priceTitle}</strong>
+                <strong>{t.priceTitle}: ${ROADSIDE_FLAT_PRICE}</strong>
                 <p>{t.priceCopy}</p>
               </div>
 
