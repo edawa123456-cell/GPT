@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { ROADSIDE_FLAT_PRICE } from '../../../lib/roadsidePrice';
 
 const SERVICES = {
   jump_start: 'Jump-start',
@@ -54,7 +55,202 @@ export async function POST(request) {
       ['Vehicle', vehicle],
       ['Details', notes || 'Not provided'],
       ['Site language', locale === 'es' ? 'Spanish' : 'English'],
-      ['Pricing', 'PRICE NOT QUOTED — contact customer with final price before dispatch'],
+      ['Quoted roadside service price', '
+      ['Dispatch', 'REQUEST ONLY — confirm availability before sending a driver'],
+    ];
+
+    const html = '<div style="font-family:Arial,sans-serif;max-width:650px;margin:auto">' +
+      '<h1>New Roadside Assistance Request</h1>' +
+      '<p style="padding:12px;background:#fff4df"><strong>SERVICE PRICE: </strong></p>' +
+      fields.map(([label, value]) => '<p><strong>' + escapeHtml(label) + ':</strong> ' + escapeHtml(value) + '</p>').join('') +
+      (mapLink ? '<p><a href="' + mapLink + '">Open customer GPS location in Google Maps</a></p>' : '') +
+      '</div>';
+
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + process.env.RESEND_API_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 'TowTruckOnDemand <notifications@towtruckondemand.com>',
+        to: [process.env.TOW_REQUEST_EMAIL],
+        subject: '[ROADSIDE  + ' — ' + name.replace(/[\r\n]/g, ' '),
+        html,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('Roadside request email failed:', response.status);
+      return NextResponse.json({ error: 'Unable to deliver roadside request.' }, { status: 502 });
+    }
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Roadside request error:', error);
+    return NextResponse.json({ error: 'Unable to process roadside request.' }, { status: 500 });
+  }
+}
+ + ROADSIDE_FLAT_PRICE + ' flat per service'],
+      ['Dispatch', 'REQUEST ONLY — confirm availability before sending a driver'],
+    ];
+
+    const html = '<div style="font-family:Arial,sans-serif;max-width:650px;margin:auto">' +
+      '<h1>New Roadside Assistance Request</h1>' +
+      '<p style="padding:12px;background:#fff4df"><strong>PRICE NOT QUOTED. CALL CUSTOMER BEFORE DISPATCH.</strong></p>' +
+      fields.map(([label, value]) => '<p><strong>' + escapeHtml(label) + ':</strong> ' + escapeHtml(value) + '</p>').join('') +
+      (mapLink ? '<p><a href="' + mapLink + '">Open customer GPS location in Google Maps</a></p>' : '') +
+      '</div>';
+
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + process.env.RESEND_API_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 'TowTruckOnDemand <notifications@towtruckondemand.com>',
+        to: [process.env.TOW_REQUEST_EMAIL],
+        subject: '[ROADSIDE] ' + SERVICES[service] + ' — ' + name.replace(/[\r\n]/g, ' '),
+        html,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('Roadside request email failed:', response.status);
+      return NextResponse.json({ error: 'Unable to deliver roadside request.' }, { status: 502 });
+    }
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Roadside request error:', error);
+    return NextResponse.json({ error: 'Unable to process roadside request.' }, { status: 500 });
+  }
+}
+ + ROADSIDE_FLAT_PRICE + '. CONFIRM AVAILABILITY BEFORE DISPATCH.</strong></p>' +
+      fields.map(([label, value]) => '<p><strong>' + escapeHtml(label) + ':</strong> ' + escapeHtml(value) + '</p>').join('') +
+      (mapLink ? '<p><a href="' + mapLink + '">Open customer GPS location in Google Maps</a></p>' : '') +
+      '</div>';
+
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + process.env.RESEND_API_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 'TowTruckOnDemand <notifications@towtruckondemand.com>',
+        to: [process.env.TOW_REQUEST_EMAIL],
+        subject: '[ROADSIDE] ' + SERVICES[service] + ' — ' + name.replace(/[\r\n]/g, ' '),
+        html,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('Roadside request email failed:', response.status);
+      return NextResponse.json({ error: 'Unable to deliver roadside request.' }, { status: 502 });
+    }
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Roadside request error:', error);
+    return NextResponse.json({ error: 'Unable to process roadside request.' }, { status: 500 });
+  }
+}
+ + ROADSIDE_FLAT_PRICE + ' flat per service'],
+      ['Dispatch', 'REQUEST ONLY — confirm availability before sending a driver'],
+    ];
+
+    const html = '<div style="font-family:Arial,sans-serif;max-width:650px;margin:auto">' +
+      '<h1>New Roadside Assistance Request</h1>' +
+      '<p style="padding:12px;background:#fff4df"><strong>PRICE NOT QUOTED. CALL CUSTOMER BEFORE DISPATCH.</strong></p>' +
+      fields.map(([label, value]) => '<p><strong>' + escapeHtml(label) + ':</strong> ' + escapeHtml(value) + '</p>').join('') +
+      (mapLink ? '<p><a href="' + mapLink + '">Open customer GPS location in Google Maps</a></p>' : '') +
+      '</div>';
+
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + process.env.RESEND_API_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 'TowTruckOnDemand <notifications@towtruckondemand.com>',
+        to: [process.env.TOW_REQUEST_EMAIL],
+        subject: '[ROADSIDE] ' + SERVICES[service] + ' — ' + name.replace(/[\r\n]/g, ' '),
+        html,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('Roadside request email failed:', response.status);
+      return NextResponse.json({ error: 'Unable to deliver roadside request.' }, { status: 502 });
+    }
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Roadside request error:', error);
+    return NextResponse.json({ error: 'Unable to process roadside request.' }, { status: 500 });
+  }
+}
+ + ROADSIDE_FLAT_PRICE + '] ' + SERVICES[service] + ' — ' + name.replace(/[\r\n]/g, ' '),
+        html,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('Roadside request email failed:', response.status);
+      return NextResponse.json({ error: 'Unable to deliver roadside request.' }, { status: 502 });
+    }
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Roadside request error:', error);
+    return NextResponse.json({ error: 'Unable to process roadside request.' }, { status: 500 });
+  }
+}
+ + ROADSIDE_FLAT_PRICE + ' flat per service'],
+      ['Dispatch', 'REQUEST ONLY — confirm availability before sending a driver'],
+    ];
+
+    const html = '<div style="font-family:Arial,sans-serif;max-width:650px;margin:auto">' +
+      '<h1>New Roadside Assistance Request</h1>' +
+      '<p style="padding:12px;background:#fff4df"><strong>PRICE NOT QUOTED. CALL CUSTOMER BEFORE DISPATCH.</strong></p>' +
+      fields.map(([label, value]) => '<p><strong>' + escapeHtml(label) + ':</strong> ' + escapeHtml(value) + '</p>').join('') +
+      (mapLink ? '<p><a href="' + mapLink + '">Open customer GPS location in Google Maps</a></p>' : '') +
+      '</div>';
+
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + process.env.RESEND_API_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 'TowTruckOnDemand <notifications@towtruckondemand.com>',
+        to: [process.env.TOW_REQUEST_EMAIL],
+        subject: '[ROADSIDE] ' + SERVICES[service] + ' — ' + name.replace(/[\r\n]/g, ' '),
+        html,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('Roadside request email failed:', response.status);
+      return NextResponse.json({ error: 'Unable to deliver roadside request.' }, { status: 502 });
+    }
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Roadside request error:', error);
+    return NextResponse.json({ error: 'Unable to process roadside request.' }, { status: 500 });
+  }
+}
+ + ROADSIDE_FLAT_PRICE + '. CONFIRM AVAILABILITY BEFORE DISPATCH.</strong></p>' +
+      fields.map(([label, value]) => '<p><strong>' + escapeHtml(label) + ':</strong> ' + escapeHtml(value) + '</p>').join('') +
+      (mapLink ? '<p><a href="' + mapLink + '">Open customer GPS location in Google Maps</a></p>' : '') +
+      '</div>';
+
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + process.env.RESEND_API_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 'TowTruckOnDemand <notifications@towtruckondemand.com>',
+        to: [process.env.TOW_REQUEST_EMAIL],
+        subject: '[ROADSIDE] ' + SERVICES[service] + ' — ' + name.replace(/[\r\n]/g, ' '),
+        html,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('Roadside request email failed:', response.status);
+      return NextResponse.json({ error: 'Unable to deliver roadside request.' }, { status: 502 });
+    }
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Roadside request error:', error);
+    return NextResponse.json({ error: 'Unable to process roadside request.' }, { status: 500 });
+  }
+}
+ + ROADSIDE_FLAT_PRICE + ' flat per service'],
       ['Dispatch', 'REQUEST ONLY — confirm availability before sending a driver'],
     ];
 
