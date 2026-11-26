@@ -58,8 +58,8 @@ const COPY = {
 export default function RoadsideRequest({ locale = 'en' }) {
   const es = locale === 'es';
   const t = COPY[es ? 'es' : 'en'];
-  const selectedPrice = roadsidePrice(service);
   const [service, setService] = useState('');
+  const selectedPrice = roadsidePrice(service);
   const [location, setLocation] = useState('');
   const [coordinates, setCoordinates] = useState(null);
   const [finding, setFinding] = useState(false);
