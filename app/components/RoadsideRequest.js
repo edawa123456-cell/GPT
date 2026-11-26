@@ -4,6 +4,7 @@ import { useState } from 'react';
 import SiteMenu from './SiteMenu';
 import SiteFooter from './SiteFooter';
 import { PHONE_HREF } from '../lib/siteContent';
+import { trackEvent } from '../lib/analytics';
 
 const SERVICES = [
   { id: 'jump_start', en: 'Jump-start', es: 'Paso de corriente', detailEn: 'For a vehicle with a discharged battery', detailEs: 'Para una batería descargada' },
@@ -95,6 +96,7 @@ export default function RoadsideRequest({ locale = 'en' }) {
         body: JSON.stringify({ service, location, coordinates, name, phone, vehicle, notes, locale }),
       });
       if (!response.ok) throw new Error('Request could not be delivered');
+      trackEvent('roadside_request', { language: locale, roadsideService: service });
       setStatus('success');
     } catch {
       setError(t.error);
