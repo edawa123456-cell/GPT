@@ -1,3 +1,4 @@
+import { roadsideMiles } from '../../lib/roadsideDistance';
 import { NextResponse } from 'next/server';
 import { roadsidePrice, vehicleOptions } from '../../lib/roadsidePrice';
 
@@ -48,6 +49,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Request notifications are temporarily unavailable.' }, { status: 503 });
     }
 
+    const miles = await roadsideMiles(location, coords);
     const fields = [
       ['Service', SERVICES[service]],
       ...(vehicleOptions(service) ? [['Vehicle type', vehicleOptions(service).find(v => v.id === data.vehicleType).en]] : []),
@@ -56,6 +58,7 @@ export async function POST(request) {
       ['Customer name', name],
       ['Phone', phone],
       ['Location', location],
+      ['Driving distance from ZIP 76028 (one way)', miles === null ? 'Unavailable — confirm with dispatch' : miles.toFixed(1) + ' mi'],
       ['Vehicle', vehicle],
       ['Details', notes || 'Not provided'],
       ['Site language', locale === 'es' ? 'Spanish' : 'English'],
