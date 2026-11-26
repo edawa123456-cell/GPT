@@ -3,7 +3,7 @@ import { SITE_URL } from '../lib/siteContent';
 
 export const metadata = {
   title: 'Roadside Assistance DFW | Jump Starts, Tires, Lockouts | Tow Truck On Demand',
-  description: 'Request roadside assistance in Fort Worth, Arlington and surrounding DFW areas. Jump-starts, spare tire changes, vehicle lockouts and fuel delivery. Flat $50 service price. Driver availability confirmed before dispatch.',
+  description: 'Request roadside assistance in Fort Worth, Arlington and surrounding DFW areas. Jump-starts, spare tire changes, vehicle lockouts and fuel delivery. $50 jump-starts, tire changes and lockouts; fuel delivery $75 including 1 gallon of gas. Availability confirmed before dispatch.',
   alternates: { canonical: SITE_URL + '/roadside-assistance', languages: { en: SITE_URL + '/roadside-assistance', es: SITE_URL + '/es/roadside-assistance' } },
 };
 
