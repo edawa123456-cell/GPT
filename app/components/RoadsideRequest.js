@@ -6,6 +6,7 @@ import SiteFooter from './SiteFooter';
 import { PHONE_HREF } from '../lib/siteContent';
 import { trackEvent } from '../lib/analytics';
 import { roadsidePrice, vehicleOptions } from '../lib/roadsidePrice';
+import RoadsideAddressInput from './RoadsideAddressInput';
 
 const SERVICES = [
   { id: 'jump_start', en: 'Jump-start', es: 'Paso de corriente', detailEn: 'For a vehicle with a discharged battery', detailEs: 'Para una batería descargada' },
@@ -185,7 +186,7 @@ export default function RoadsideRequest({ locale = 'en' }) {
               </>}
 
               <label htmlFor="roadside-location">{t.location}</label>
-              <input id="roadside-location" value={location} onChange={e => { setLocation(e.target.value); setCoordinates(null); }} placeholder={t.locationPlaceholder} maxLength={300} autoComplete="street-address" required />
+              <RoadsideAddressInput id="roadside-location" value={location} onChange={value => { setLocation(value); setCoordinates(null); }} placeholder={t.locationPlaceholder} locale={locale} />
               <button type="button" className="roadsideGps" onClick={locate} disabled={finding}>{finding ? t.finding : t.gps}</button>
 
               <p>{es ? 'Desde el código postal 76028: primeras 10 millas incluidas; 10.1–20 millas +$15; 20.1–30 millas +$50.' : 'From ZIP 76028: first 10 miles included; 10.1–20 miles add $15; 20.1–30 miles add $50.'}</p>
