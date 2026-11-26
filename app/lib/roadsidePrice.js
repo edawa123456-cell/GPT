@@ -29,6 +29,7 @@ export function roadsideQuote(service, vehicleType, miles) {
   if (base === null || !Number.isFinite(miles) || miles < 0) return null;
   if (miles > 30) return { outsideServiceArea: true };
   const distance = Number(miles.toFixed(1));
-  const travel = distance <= 10 ? 0 : distance <= 20 ? 15 : 50;
+  // Determine tier from the actual route distance, not its rounded display value.
+  const travel = miles <= 10 ? 0 : miles <= 20 ? 15 : 50;
   return { base, miles: distance, travel, total: base + travel };
 }
