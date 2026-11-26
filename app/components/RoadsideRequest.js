@@ -18,7 +18,7 @@ const COPY = {
   en: {
     menu: 'Explore', call: 'Call us', eyebrow: 'ROADSIDE HELP THROUGHOUT DFW',
     title: 'Roadside assistance in Fort Worth & DFW',
-    intro: 'Dead battery, flat tire, locked keys or out of fuel? Tell us what happened and where you are. Service prices start at $50. Fuel delivery is $75 including 1 gallon of gas. We confirm availability before dispatch.',
+    intro: 'Dead battery, flat tire, locked keys or out of fuel? Tell us what happened and where you are. Service prices start at $65. Fuel delivery is $75 including 1 gallon of gas. We confirm availability before dispatch.',
     start: 'Request roadside assistance', service: 'What do you need help with?', location: 'Where is the vehicle?',
     locationPlaceholder: 'Street address, business or nearby intersection',
     gps: 'Use my current location', finding: 'Finding your location…', gpsFailed: 'Location unavailable. Enter an address instead.',
@@ -37,7 +37,7 @@ const COPY = {
   es: {
     menu: 'Explorar', call: 'Llámanos', eyebrow: 'ASISTENCIA EN CARRETERA EN DFW',
     title: 'Asistencia en carretera en Fort Worth y DFW',
-    intro: '¿Batería descargada, llanta ponchada, llaves dentro del auto o sin gasolina? Dinos qué pasó y dónde estás. Precios desde $50. La entrega de combustible cuesta $75 e incluye 1 galón de gasolina. Confirmaremos la disponibilidad antes de enviar ayuda.',
+    intro: '¿Batería descargada, llanta ponchada, llaves dentro del auto o sin gasolina? Dinos qué pasó y dónde estás. Precios desde $65. La entrega de combustible cuesta $75 e incluye 1 galón de gasolina. Confirmaremos la disponibilidad antes de enviar ayuda.',
     start: 'Solicitar asistencia', service: '¿Qué servicio necesitas?', location: '¿Dónde está el vehículo?',
     locationPlaceholder: 'Dirección, negocio o intersección cercana',
     gps: 'Usar mi ubicación actual', finding: 'Buscando tu ubicación…', gpsFailed: 'No se pudo obtener tu ubicación. Escribe una dirección.',

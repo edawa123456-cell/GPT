@@ -1,6 +1,6 @@
 /** Flat service prices, in USD. Fuel delivery includes one gallon of gas. */
 export const ROADSIDE_PRICES = Object.freeze({
-  lockout: 50,
+  lockout: 65,
   fuel_delivery: 75,
 });
 export const JUMP_TYPES = [
