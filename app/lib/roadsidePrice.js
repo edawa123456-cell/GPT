@@ -23,3 +23,11 @@ export function roadsidePrice(service, vehicleType) {
   if (options) return options.find(v => v.id === vehicleType)?.price ?? null;
   return Object.prototype.hasOwnProperty.call(ROADSIDE_PRICES, service) ? ROADSIDE_PRICES[service] : null;
 }
+
+export function roadsideQuote(service, vehicleType, miles) {
+  const base = roadsidePrice(service, vehicleType);
+  if (base === null || !Number.isFinite(miles) || miles < 0) return null;
+  const distance = Number(miles.toFixed(1));
+  const travel = distance <= 10 ? 0 : distance <= 20 ? 15 : 50;
+  return { base, miles: distance, travel, total: base + travel };
+}

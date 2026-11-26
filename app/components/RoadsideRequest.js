@@ -73,6 +73,20 @@ export default function RoadsideRequest({ locale = 'en' }) {
   const [status, setStatus] = useState('idle');
   const [error, setError] = useState('');
 
+  const [estimate, setEstimate] = useState(null);
+  const [calculating, setCalculating] = useState(false);
+  const quoteKey = JSON.stringify({ service, vehicleType, location, coordinates });
+  const quote = estimate?.key === quoteKey ? estimate.value : null;
+  async function calculate() {
+    setError(''); setCalculating(true); setEstimate(null);
+    try {
+      const res = await fetch('/api/roadside-quote', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: quoteKey });
+      if (!res.ok) throw new Error();
+      setEstimate({ key: quoteKey, value: await res.json() });
+    } catch {
+      setError(es ? 'No pudimos calcular la distancia. Revisa la dirección o llámanos.' : 'We could not calculate the distance. Check the address or call us.');
+    } finally { setCalculating(false); }
+  }
   function locate() {
     if (!navigator.geolocation) { setError(t.gpsFailed); return; }
     setFinding(true);
@@ -92,14 +106,18 @@ export default function RoadsideRequest({ locale = 'en' }) {
   async function submit(event) {
     event.preventDefault();
     if (!service) { setError(t.invalidService); return; }
+    if (!quote) return;
     setStatus('sending');
     setError('');
     try {
       const response = await fetch('/api/send-roadside-request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ service, vehicleType: options ? vehicleType : undefined, location, coordinates, name, phone, vehicle, notes, locale }),
+        body: JSON.stringify({ quotedTotal: quote.total, service, vehicleType: options ? vehicleType : undefined, location, coordinates, name, phone, vehicle, notes, locale }),
       });
+      if (response.status === 409) {
+        setEstimate(null); setStatus('idle'); setError(es ? 'Vuelve a calcular el precio.' : 'Please calculate your updated price.'); return;
+      }
       if (!response.ok) throw new Error('Request could not be delivered');
       trackEvent('roadside_request', { language: locale, roadsideService: service });
       setStatus('success');
@@ -136,7 +154,7 @@ export default function RoadsideRequest({ locale = 'en' }) {
               <h2>{t.received}</h2>
               <p>{t.receivedInfo}</p>
               <button type="button" className="primary" onClick={() => {
-                setStatus('idle'); setService(''); setVehicleType(''); setLocation(''); setCoordinates(null); setName(''); setPhone(''); setVehicle(''); setNotes('');
+                setEstimate(null); setStatus('idle'); setService(''); setVehicleType(''); setLocation(''); setCoordinates(null); setName(''); setPhone(''); setVehicle(''); setNotes('');
               }}>{t.another}</button>
             </div>
           ) : (
@@ -167,6 +185,10 @@ export default function RoadsideRequest({ locale = 'en' }) {
               <input id="roadside-location" value={location} onChange={e => { setLocation(e.target.value); setCoordinates(null); }} placeholder={t.locationPlaceholder} maxLength={300} autoComplete="street-address" required />
               <button type="button" className="roadsideGps" onClick={locate} disabled={finding}>{finding ? t.finding : t.gps}</button>
 
+              <p>{es ? 'Desde el código postal 76028: primeras 10 millas incluidas; 10.1–20 millas +$15; desde 20.1 millas +$50.' : 'From ZIP 76028: first 10 miles included; 10.1–20 miles add $15; 20.1 miles and up add $50.'}</p>
+              <button type="button" className="primary" disabled={calculating || finding || selectedPrice == null || location.trim().length < 5} onClick={calculate}>{calculating ? '…' : es ? 'Ver mi precio total' : 'See my total price'}</button>
+              {quote && <p role="status">{es ? 'Precio base' : 'Base price'}: ${quote.base} + {es ? 'traslado' : 'travel'} ({quote.miles} mi): ${quote.travel}. <strong>Total: ${quote.total}</strong></p>}
+
               <div className="twoCol">
                 <div><label htmlFor="roadside-name">{t.name}</label><input id="roadside-name" value={name} onChange={e => setName(e.target.value)} placeholder={t.namePlaceholder} autoComplete="name" maxLength={100} required /></div>
                 <div><label htmlFor="roadside-phone">{t.phone}</label><input id="roadside-phone" type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder={t.phonePlaceholder} autoComplete="tel" maxLength={30} required /></div>
@@ -178,11 +200,11 @@ export default function RoadsideRequest({ locale = 'en' }) {
               <textarea id="roadside-notes" value={notes} onChange={e => setNotes(e.target.value)} placeholder={t.notesPlaceholder} maxLength={500} rows={2} />
 
               <div className="roadsidePriceNotice">
-                <strong>{t.priceTitle}: {selectedPrice == null ? (options ? typePrompt : (es ? 'Selecciona un servicio' : 'Select a service')) : '$' + selectedPrice}</strong>
+                <strong>{es ? 'Precio base' : 'Base price'}: {selectedPrice == null ? (options ? typePrompt : (es ? 'Selecciona un servicio' : 'Select a service')) : '$' + selectedPrice}</strong>
                 <p>{t.priceCopy}</p>
               </div>
 
-              <button type="submit" className="primary" disabled={status === 'sending'}>{status === 'sending' ? t.sending : t.request + (selectedPrice == null ? '' : ' — $' + selectedPrice)}</button>
+              <button type="submit" className="primary" disabled={!quote || status === 'sending'}>{status === 'sending' ? t.sending : t.request + (quote ? ' — $' + quote.total : '')}</button>
               <p className="finePrint">{t.note}</p>
               {error && <p className="errorBox" role="alert">{error}</p>}
             </form>

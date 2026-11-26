@@ -1,6 +1,6 @@
 import { roadsideMiles } from '../../lib/roadsideDistance';
 import { NextResponse } from 'next/server';
-import { roadsidePrice, vehicleOptions } from '../../lib/roadsidePrice';
+import { roadsidePrice, roadsideQuote, vehicleOptions } from '../../lib/roadsidePrice';
 
 const SERVICES = {
   jump_start: 'Jump-start',
@@ -19,7 +19,7 @@ export async function POST(request) {
     const data = await request.json().catch(() => null);
     if (!data || typeof data !== 'object') return NextResponse.json({ error: 'Invalid request.' }, { status: 400 });
     const { service } = data;
-    const price = roadsidePrice(service, data.vehicleType);
+    const base = roadsidePrice(service, data.vehicleType);
     const location = clean(data.location, 300);
     const name = clean(data.name, 100);
     const phone = clean(data.phone, 30);
@@ -27,7 +27,7 @@ export async function POST(request) {
     const notes = clean(data.notes, 500);
     const locale = data.locale === 'es' ? 'es' : 'en';
 
-    if (price === null || location.length < 5 || name.length < 2 ||
+    if (base === null || location.length < 5 || name.length < 2 ||
         phone.replace(/\D/g, '').length < 10 || phone.replace(/\D/g, '').length > 15 ||
         vehicle.length < 2) {
       return NextResponse.json({ error: 'Please complete the required service, location and contact details.' }, { status: 400 });
@@ -50,7 +50,12 @@ export async function POST(request) {
     }
 
     const miles = await roadsideMiles(location, coords);
+    const quote = roadsideQuote(service, data.vehicleType, miles);
+    if (!quote) return NextResponse.json({ error: 'Route unavailable' }, { status: 503 });
+    if (data.quotedTotal !== quote.total) return NextResponse.json({ error: 'Refresh quote' }, { status: 409 });
+    const price = quote.total;
     const fields = [
+      ['Base price', '$' + base], ['Travel fee', '$' + quote.travel],
       ['Service', SERVICES[service]],
       ...(vehicleOptions(service) ? [['Vehicle type', vehicleOptions(service).find(v => v.id === data.vehicleType).en]] : []),
       ['Quoted roadside service price', '$' + price],
