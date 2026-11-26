@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { roadsidePrice, JUMP_TYPES } from '../../lib/roadsidePrice';
+import { roadsidePrice, vehicleOptions } from '../../lib/roadsidePrice';
 
 const SERVICES = {
   jump_start: 'Jump-start',
@@ -50,7 +50,7 @@ export async function POST(request) {
 
     const fields = [
       ['Service', SERVICES[service]],
-      ...(service === 'jump_start' ? [['Vehicle type', JUMP_TYPES.find(v => v.id === data.vehicleType).en]] : []),
+      ...(vehicleOptions(service) ? [['Vehicle type', vehicleOptions(service).find(v => v.id === data.vehicleType).en]] : []),
       ['Quoted roadside service price', '$' + price],
       ['Fuel included', service === 'fuel_delivery' ? '1 gallon of gas included in $75' : 'Not applicable'],
       ['Customer name', name],

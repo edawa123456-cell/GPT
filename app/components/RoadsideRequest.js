@@ -5,11 +5,11 @@ import SiteMenu from './SiteMenu';
 import SiteFooter from './SiteFooter';
 import { PHONE_HREF } from '../lib/siteContent';
 import { trackEvent } from '../lib/analytics';
-import { roadsidePrice, JUMP_TYPES } from '../lib/roadsidePrice';
+import { roadsidePrice, vehicleOptions } from '../lib/roadsidePrice';
 
 const SERVICES = [
   { id: 'jump_start', en: 'Jump-start', es: 'Paso de corriente', detailEn: 'For a vehicle with a discharged battery', detailEs: 'Para una batería descargada' },
-  { id: 'tire_change', en: 'Spare tire change', es: 'Cambio de llanta', detailEn: 'You must have a usable spare tire', detailEs: 'Debes tener una llanta de repuesto utilizable' },
+  { id: 'tire_change', en: 'Spare tire change', es: 'Cambio de llanta', detailEn: 'Sedans, SUVs and pickups only. Usable spare required.', detailEs: 'Solo sedanes, SUV y pickups. Se requiere una llanta de repuesto en buen estado.' },
   { id: 'lockout', en: 'Vehicle lockout', es: 'Apertura de vehículo', detailEn: 'Keys locked inside a passenger vehicle', detailEs: 'Llaves dentro de un vehículo de pasajeros' },
   { id: 'fuel_delivery', en: 'Fuel delivery', es: 'Entrega de combustible', detailEn: 'Includes 1 gallon of gas', detailEs: 'Incluye 1 galón de gasolina' },
 ];
@@ -60,6 +60,7 @@ export default function RoadsideRequest({ locale = 'en' }) {
   const t = COPY[es ? 'es' : 'en'];
   const [service, setService] = useState('');
   const [vehicleType, setVehicleType] = useState('');
+  const options = vehicleOptions(service);
   const typePrompt = es ? 'Selecciona el tipo de vehículo' : 'Select your vehicle type';
   const selectedPrice = roadsidePrice(service, vehicleType);
   const [location, setLocation] = useState('');
@@ -97,7 +98,7 @@ export default function RoadsideRequest({ locale = 'en' }) {
       const response = await fetch('/api/send-roadside-request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ service, vehicleType: service === 'jump_start' ? vehicleType : undefined, location, coordinates, name, phone, vehicle, notes, locale }),
+        body: JSON.stringify({ service, vehicleType: options ? vehicleType : undefined, location, coordinates, name, phone, vehicle, notes, locale }),
       });
       if (!response.ok) throw new Error('Request could not be delivered');
       trackEvent('roadside_request', { language: locale, roadsideService: service });
@@ -146,19 +147,19 @@ export default function RoadsideRequest({ locale = 'en' }) {
                 <div className="roadsideServices">
                   {SERVICES.map(item => (
                     <label key={item.id} className={`roadsideChoice ${service === item.id ? 'selected' : ''}`}>
-                      <input type="radio" name="roadside-service" value={item.id} checked={service === item.id} onChange={() => setService(item.id)} required />
+                      <input type="radio" name="roadside-service" value={item.id} checked={service === item.id} onChange={() => { setService(item.id); setVehicleType(''); }} required />
                       <span className="roadsideChoiceTitle">{es ? item.es : item.en}</span>
                       <small>{es ? item.detailEs : item.detailEn}</small>
-                      <strong className="roadsideChoicePrice">{item.id === 'jump_start' ? (es ? 'Desde $' : 'From $') + JUMP_TYPES[0].price : '$' + roadsidePrice(item.id)}</strong>
+                      <strong className="roadsideChoicePrice">{vehicleOptions(item.id) ? (es ? 'Desde $' : 'From $') + vehicleOptions(item.id)[0].price : '$' + roadsidePrice(item.id)}</strong>
                     </label>
                   ))}
                 </div>
               </fieldset>
-              {service === 'jump_start' && <>
-                <label htmlFor="jump-type">{typePrompt}</label>
-                <select id="jump-type" required value={vehicleType} onChange={e => setVehicleType(e.target.value)}>
+              {options && <>
+                <label htmlFor="roadside-type">{typePrompt}</label>
+                <select id="roadside-type" required value={vehicleType} onChange={e => setVehicleType(e.target.value)}>
                   <option value="">{typePrompt}</option>
-                  {JUMP_TYPES.map(v => <option key={v.id} value={v.id}>{v[locale]} — ${v.price}</option>)}
+                  {options.map(v => <option key={v.id} value={v.id}>{v[locale]} — ${v.price}</option>)}
                 </select>
               </>}
 
@@ -177,7 +178,7 @@ export default function RoadsideRequest({ locale = 'en' }) {
               <textarea id="roadside-notes" value={notes} onChange={e => setNotes(e.target.value)} placeholder={t.notesPlaceholder} maxLength={500} rows={2} />
 
               <div className="roadsidePriceNotice">
-                <strong>{t.priceTitle}: {selectedPrice == null ? (service === 'jump_start' ? typePrompt : (es ? 'Selecciona un servicio' : 'Select a service')) : '$' + selectedPrice}</strong>
+                <strong>{t.priceTitle}: {selectedPrice == null ? (options ? typePrompt : (es ? 'Selecciona un servicio' : 'Select a service')) : '$' + selectedPrice}</strong>
                 <p>{t.priceCopy}</p>
               </div>
 
