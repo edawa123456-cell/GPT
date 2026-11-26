@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { roadsidePrice } from '../../lib/roadsidePrice';
+import { roadsidePrice, JUMP_TYPES } from '../../lib/roadsidePrice';
 
 const SERVICES = {
   jump_start: 'Jump-start',
@@ -18,7 +18,7 @@ export async function POST(request) {
     const data = await request.json().catch(() => null);
     if (!data || typeof data !== 'object') return NextResponse.json({ error: 'Invalid request.' }, { status: 400 });
     const { service } = data;
-    const price = roadsidePrice(service);
+    const price = roadsidePrice(service, data.vehicleType);
     const location = clean(data.location, 300);
     const name = clean(data.name, 100);
     const phone = clean(data.phone, 30);
@@ -50,6 +50,7 @@ export async function POST(request) {
 
     const fields = [
       ['Service', SERVICES[service]],
+      ...(service === 'jump_start' ? [['Vehicle type', JUMP_TYPES.find(v => v.id === data.vehicleType).en]] : []),
       ['Quoted roadside service price', '$' + price],
       ['Fuel included', service === 'fuel_delivery' ? '1 gallon of gas included in $75' : 'Not applicable'],
       ['Customer name', name],

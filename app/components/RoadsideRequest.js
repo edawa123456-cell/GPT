@@ -5,7 +5,7 @@ import SiteMenu from './SiteMenu';
 import SiteFooter from './SiteFooter';
 import { PHONE_HREF } from '../lib/siteContent';
 import { trackEvent } from '../lib/analytics';
-import { roadsidePrice } from '../lib/roadsidePrice';
+import { roadsidePrice, JUMP_TYPES } from '../lib/roadsidePrice';
 
 const SERVICES = [
   { id: 'jump_start', en: 'Jump-start', es: 'Paso de corriente', detailEn: 'For a vehicle with a discharged battery', detailEs: 'Para una batería descargada' },
@@ -26,7 +26,7 @@ const COPY = {
     vehicle: 'Vehicle make and model', vehiclePlaceholder: 'Example: Toyota Camry',
     notes: 'Helpful details (optional)', notesPlaceholder: 'Parking lot, tire location, fuel type, access details…',
     request: 'REQUEST ROADSIDE ASSISTANCE', sending: 'SENDING REQUEST…',
-    priceTitle: 'Service price', priceCopy: 'Jump-start, spare tire change and lockout: $50. Fuel delivery: $75 including 1 gallon of gas. No online payment required. We confirm availability before dispatch.',
+    priceTitle: 'Service price', priceCopy: 'No online payment required. We confirm availability before dispatch.',
     note: 'Request only — we will confirm service availability before dispatch. Any additional work will be discussed first.',
     received: 'Roadside request received', receivedInfo: 'Your roadside assistance request was received. We will contact you to confirm driver availability. This is not yet a confirmed dispatch.',
     another: 'Request another service', callHelp: 'Prefer to speak with dispatch?', serviceArea: 'Fort Worth, Arlington and surrounding DFW areas. Availability varies by location.',
@@ -45,7 +45,7 @@ const COPY = {
     vehicle: 'Marca y modelo del vehículo', vehiclePlaceholder: 'Ejemplo: Toyota Camry',
     notes: 'Detalles útiles (opcional)', notesPlaceholder: 'Estacionamiento, llanta dañada, tipo de combustible, acceso…',
     request: 'SOLICITAR ASISTENCIA', sending: 'ENVIANDO SOLICITUD…',
-    priceTitle: 'Precio del servicio', priceCopy: 'Paso de corriente, cambio de llanta y apertura: $50. Entrega de combustible: $75, incluye 1 galón de gasolina. No necesitas pagar en línea. Confirmaremos disponibilidad antes de enviar ayuda.',
+    priceTitle: 'Precio del servicio', priceCopy: 'No necesitas pagar en línea. Confirmaremos disponibilidad antes de enviar ayuda.',
     note: 'Solo solicitud: confirmaremos disponibilidad antes de enviar ayuda. Hablaremos contigo antes de cualquier trabajo adicional.',
     received: 'Solicitud de asistencia recibida', receivedInfo: 'Recibimos tu solicitud de asistencia. Te contactaremos para confirmar disponibilidad. Todavía no se ha confirmado el envío de ayuda.',
     another: 'Solicitar otro servicio', callHelp: '¿Prefieres hablar con nosotros?', serviceArea: 'Fort Worth, Arlington y zonas cercanas de DFW. La disponibilidad depende del lugar.',
@@ -59,7 +59,9 @@ export default function RoadsideRequest({ locale = 'en' }) {
   const es = locale === 'es';
   const t = COPY[es ? 'es' : 'en'];
   const [service, setService] = useState('');
-  const selectedPrice = roadsidePrice(service);
+  const [vehicleType, setVehicleType] = useState('');
+  const typePrompt = es ? 'Selecciona el tipo de vehículo' : 'Select your vehicle type';
+  const selectedPrice = roadsidePrice(service, vehicleType);
   const [location, setLocation] = useState('');
   const [coordinates, setCoordinates] = useState(null);
   const [finding, setFinding] = useState(false);
@@ -95,7 +97,7 @@ export default function RoadsideRequest({ locale = 'en' }) {
       const response = await fetch('/api/send-roadside-request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ service, location, coordinates, name, phone, vehicle, notes, locale }),
+        body: JSON.stringify({ service, vehicleType: service === 'jump_start' ? vehicleType : undefined, location, coordinates, name, phone, vehicle, notes, locale }),
       });
       if (!response.ok) throw new Error('Request could not be delivered');
       trackEvent('roadside_request', { language: locale, roadsideService: service });
@@ -133,7 +135,7 @@ export default function RoadsideRequest({ locale = 'en' }) {
               <h2>{t.received}</h2>
               <p>{t.receivedInfo}</p>
               <button type="button" className="primary" onClick={() => {
-                setStatus('idle'); setService(''); setLocation(''); setCoordinates(null); setName(''); setPhone(''); setVehicle(''); setNotes('');
+                setStatus('idle'); setService(''); setVehicleType(''); setLocation(''); setCoordinates(null); setName(''); setPhone(''); setVehicle(''); setNotes('');
               }}>{t.another}</button>
             </div>
           ) : (
@@ -147,11 +149,18 @@ export default function RoadsideRequest({ locale = 'en' }) {
                       <input type="radio" name="roadside-service" value={item.id} checked={service === item.id} onChange={() => setService(item.id)} required />
                       <span className="roadsideChoiceTitle">{es ? item.es : item.en}</span>
                       <small>{es ? item.detailEs : item.detailEn}</small>
-                      <strong className="roadsideChoicePrice">${roadsidePrice(item.id)}</strong>
+                      <strong className="roadsideChoicePrice">{item.id === 'jump_start' ? (es ? 'Desde $' : 'From $') + JUMP_TYPES[0].price : '$' + roadsidePrice(item.id)}</strong>
                     </label>
                   ))}
                 </div>
               </fieldset>
+              {service === 'jump_start' && <>
+                <label htmlFor="jump-type">{typePrompt}</label>
+                <select id="jump-type" required value={vehicleType} onChange={e => setVehicleType(e.target.value)}>
+                  <option value="">{typePrompt}</option>
+                  {JUMP_TYPES.map(v => <option key={v.id} value={v.id}>{v[locale]} — ${v.price}</option>)}
+                </select>
+              </>}
 
               <label htmlFor="roadside-location">{t.location}</label>
               <input id="roadside-location" value={location} onChange={e => { setLocation(e.target.value); setCoordinates(null); }} placeholder={t.locationPlaceholder} maxLength={300} autoComplete="street-address" required />
@@ -168,7 +177,7 @@ export default function RoadsideRequest({ locale = 'en' }) {
               <textarea id="roadside-notes" value={notes} onChange={e => setNotes(e.target.value)} placeholder={t.notesPlaceholder} maxLength={500} rows={2} />
 
               <div className="roadsidePriceNotice">
-                <strong>{t.priceTitle}: {selectedPrice == null ? (es ? 'Selecciona un servicio' : 'Select a service') : '$' + selectedPrice}</strong>
+                <strong>{t.priceTitle}: {selectedPrice == null ? (service === 'jump_start' ? typePrompt : (es ? 'Selecciona un servicio' : 'Select a service')) : '$' + selectedPrice}</strong>
                 <p>{t.priceCopy}</p>
               </div>
 
