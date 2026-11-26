@@ -26,7 +26,7 @@ export function initializeGoogleTracking() {
   document.head.appendChild(script);
 }
 
-const EVENTS = new Set(['quote_start', 'quote_request', 'quote_view', 'quote_error', 'booking_start', 'booking_attempt', 'booking_error', 'generate_lead', 'phone_click', 'social_click', 'content_scroll']);
+const EVENTS = new Set(['quote_start', 'quote_request', 'quote_view', 'quote_error', 'booking_start', 'booking_attempt', 'booking_error', 'generate_lead', 'phone_click', 'social_click', 'content_scroll', 'roadside_request']);
 const PARTNERS = new Set(['Direct', 'Jo Towing', 'Xpress Towing', 'J-Jasmine Towing', 'Jasmine Towing']);
 
 // Never accept form values, arbitrary URLs, error messages or customer identifiers.
@@ -35,6 +35,7 @@ export function analyticsParameters(input = {}) {
   if (['en', 'es'].includes(input.language)) result.site_language = input.language;
   if (['ASAP', 'Schedule for later'].includes(input.timing)) result.pickup_timing = input.timing === 'ASAP' ? 'asap' : 'scheduled';
   if (['Sedan', 'SUV', 'Pickup'].includes(input.vehicle)) result.vehicle_type = input.vehicle;
+  if (['jump_start', 'tire_change', 'lockout', 'fuel_delivery'].includes(input.roadsideService)) result.roadside_service = input.roadsideService;
   if (PARTNERS.has(input.leadSource)) result.referral_partner = input.leadSource;
   if (['Facebook', 'Instagram'].includes(input.social)) result.social_network = input.social;
   if ([50, 90].includes(input.depth)) result.percent_scrolled = input.depth;
