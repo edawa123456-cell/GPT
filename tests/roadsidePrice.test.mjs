@@ -18,9 +18,9 @@ test('correct base prices including one gallon fuel delivery', () => {
 
 test('mileage fees use actual unrounded distance', () => {
   assert.deepEqual(roadsideQuote('lockout', '', 10), { base:65, miles:10, travel:0, total:65 });
-  assert.deepEqual(roadsideQuote('lockout', '', 10.04), { base:65, miles:10, travel:15, total:80 });
+  assert.deepEqual(roadsideQuote('lockout', '', 10.04), { base:65, miles:10.1, travel:15, total:80 });
   assert.deepEqual(roadsideQuote('lockout', '', 20), { base:65, miles:20, travel:15, total:80 });
-  assert.deepEqual(roadsideQuote('lockout', '', 20.04), { base:65, miles:20, travel:50, total:115 });
+  assert.deepEqual(roadsideQuote('lockout', '', 20.04), { base:65, miles:20.1, travel:50, total:115 });
   assert.deepEqual(roadsideQuote('fuel_delivery', '', 30), { base:75, miles:30, travel:50, total:125 });
   assert.deepEqual(roadsideQuote('jump_start', 'pickup', 12), { base:85, miles:12, travel:15, total:100 });
 });
