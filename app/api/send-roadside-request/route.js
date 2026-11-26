@@ -1,3 +1,4 @@
+import { roadsideHours } from '../../lib/roadsideHours';
 import { roadsideMiles } from '../../lib/roadsideDistance';
 import { NextResponse } from 'next/server';
 import { roadsidePrice, roadsideQuote, vehicleOptions } from '../../lib/roadsidePrice';
@@ -16,6 +17,8 @@ const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => ({
 
 export async function POST(request) {
   try {
+    const hours = roadsideHours();
+    if (!hours.open) return NextResponse.json({ error: 'closed', hours }, { status: 403 });
     const data = await request.json().catch(() => null);
     if (!data || typeof data !== 'object') return NextResponse.json({ error: 'Invalid request.' }, { status: 400 });
     const { service } = data;

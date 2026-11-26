@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { roadsideHours } from '../lib/roadsideHours';
 import SiteMenu from './SiteMenu';
 import SiteFooter from './SiteFooter';
 import { PHONE_HREF } from '../lib/siteContent';
@@ -59,6 +60,17 @@ const COPY = {
 export default function RoadsideRequest({ locale = 'en' }) {
   const es = locale === 'es';
   const t = COPY[es ? 'es' : 'en'];
+  const [hours, setHours] = useState(null);
+  useEffect(() => {
+    const refresh = () => setHours(roadsideHours());
+    refresh();
+    const timer = setInterval(refresh, 15000);
+    window.addEventListener('focus', refresh);
+    return () => { clearInterval(timer); window.removeEventListener('focus', refresh); };
+  }, []);
+  const closedMessage = hours && !hours.open && (es
+    ? `Puedes consultar el precio ahora. Aceptamos solicitudes de nuevo ${hours.tomorrow ? 'mañana' : 'hoy'} a las ${hours.opensAt}:00 a. m. (hora central).`
+    : `You can check your price now. Requests reopen ${hours.tomorrow ? 'tomorrow' : 'today'} at ${hours.opensAt}:00 AM Central.`);
   const [service, setService] = useState('');
   const [vehicleType, setVehicleType] = useState('');
   const options = vehicleOptions(service);
@@ -109,7 +121,9 @@ export default function RoadsideRequest({ locale = 'en' }) {
   async function submit(event) {
     event.preventDefault();
     if (!service) { setError(t.invalidService); return; }
-    if (!quote) return;
+    const currentHours = roadsideHours();
+    setHours(currentHours);
+    if (!quote || !currentHours.open) return;
     setStatus('sending');
     setError('');
     try {
@@ -118,6 +132,10 @@ export default function RoadsideRequest({ locale = 'en' }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ quotedTotal: quote.total, service, vehicleType: options ? vehicleType : undefined, location, coordinates, name, phone, vehicle, notes, locale }),
       });
+      if (response.status === 403) {
+        const result = await response.json();
+        if (result.error === 'closed') { setHours(result.hours); setStatus('idle'); return; }
+      }
       if (response.status === 422) { setEstimate({ key: quoteKey, outside: true }); setStatus('idle'); return; }
       if (response.status === 409) {
         setEstimate(null); setStatus('idle'); setError(es ? 'Vuelve a calcular el precio.' : 'Please calculate your updated price.'); return;
@@ -149,6 +167,8 @@ export default function RoadsideRequest({ locale = 'en' }) {
           <p className="lede">{t.intro}</p>
           <div className="trustRow"><span>{es ? 'Servicio local' : 'Local DFW service'}</span><span>{es ? 'Sin pago en línea' : 'No online payment'}</span></div>
           <p className="roadsideArea">{t.serviceArea}</p>
+          <p>{es ? 'Horario de solicitudes: lunes a sábado, 7 a. m.–7 p. m.; domingo, 10 a. m.–6 p. m. (hora central).' : 'Request hours: Mon–Sat, 7 AM–7 PM; Sunday, 10 AM–6 PM (Central).'}</p>
+          {closedMessage && <p role="status">{closedMessage}</p>}
         </div>
 
         <div className="bookingCard roadsideCard" id="roadside-request">
@@ -209,7 +229,8 @@ export default function RoadsideRequest({ locale = 'en' }) {
                 <p>{t.priceCopy}</p>
               </div>
 
-              <button type="submit" className="primary" disabled={!quote || status === 'sending'}>{status === 'sending' ? t.sending : t.request + (quote ? ' — $' + quote.total : '')}</button>
+              <button type="submit" className="primary" disabled={!hours?.open || !quote || status === 'sending'}>{status === 'sending' ? t.sending : t.request + (quote ? ' — $' + quote.total : '')}</button>
+              {closedMessage && <p>{closedMessage}</p>}
               <p className="finePrint">{t.note}</p>
               {error && <p className="errorBox" role="alert">{error}</p>}
             </form>
