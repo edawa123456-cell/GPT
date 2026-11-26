@@ -168,32 +168,11 @@ export default function RoadsideRequest({ locale = 'en' }) {
               <textarea id="roadside-notes" value={notes} onChange={e => setNotes(e.target.value)} placeholder={t.notesPlaceholder} maxLength={500} rows={2} />
 
               <div className="roadsidePriceNotice">
-                <strong>{t.priceTitle}: {selectedPrice == null ? (es ? 'Selecciona un servicio' : 'Select a service') : `${'
+                <strong>{t.priceTitle}: {selectedPrice == null ? (es ? 'Selecciona un servicio' : 'Select a service') : '$' + selectedPrice}</strong>
                 <p>{t.priceCopy}</p>
               </div>
 
-              <button type="submit" className="primary" disabled={status === 'sending'}>{status === 'sending' ? t.sending : (selectedPrice == null ? t.request : `${'${t.request}'} — ${'${selectedPrice}'}`)}</button>
-              <p className="finePrint">{t.note}</p>
-              {error && <p className="errorBox" role="alert">{error}</p>}
-            </form>
-          )}
-        </div>
-      </section>
-      <section className="roadsideMore">
-        <h2>{t.extra}</h2>
-        <p>{t.noGuarantee}</p>
-        <p>{t.backTow} <a href={es ? '/es#booking' : '/#booking'}>{t.towLink}</a></p>
-        <a className="roadsidePhone" href={PHONE_HREF}>{t.call}</a>
-      </section>
-      <SiteFooter locale={locale} />
-    </main>
-  );
-}
-}${selectedPrice}`}</strong>
-                <p>{t.priceCopy}</p>
-              </div>
-
-              <button type="submit" className="primary" disabled={status === 'sending'}>{status === 'sending' ? t.sending : t.request}</button>
+              <button type="submit" className="primary" disabled={status === 'sending'}>{status === 'sending' ? t.sending : t.request + (selectedPrice == null ? '' : ' — $' + selectedPrice)}</button>
               <p className="finePrint">{t.note}</p>
               {error && <p className="errorBox" role="alert">{error}</p>}
             </form>
