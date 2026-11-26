@@ -923,6 +923,16 @@ try { if (!isTrackingExcluded() && typeof window !== 'undefined' && window.gtag)
 
                     </div>
 
+                    <div className="quoteTrust" aria-label={isSpanish ? "Información del servicio" : "Service information"}>
+                      <div className="quoteTrustBadges">
+                        <span>{isSpanish ? "Grúas locales en DFW" : "Local DFW towing"}</span>
+                        <span>{isSpanish ? "Paga al recoger tu vehículo" : "Pay at pickup"}</span>
+                      </div>
+                      <p>{isSpanish
+                        ? "Confirmaremos la disponibilidad de la grúa antes de enviarla."
+                        : "We'll confirm truck availability before dispatch."}</p>
+                    </div>
+
                     <details className="breakdown">
 
                       <summary>{t("Price breakdown")}</summary>

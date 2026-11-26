@@ -193,3 +193,10 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid #14
 .skipLink{position:fixed;left:16px;top:-100px;z-index:999999;padding:14px 18px;border-radius:10px;background:var(--ink);color:#fff;font-weight:700;font-size:14px;text-decoration:none}
 .skipLink:focus{top:12px}
 @media(max-width:560px){.nav{gap:6px}.nav .languageLink{margin-left:0}.nav .callLink{padding:10px}.nav .brand{font-size:23px}.nav .brandBottom{font-size:18px}}
+
+/* Compact reassurance beside the quote, without adding imagery or a large mobile section. */
+.quoteTrust{margin-top:10px;padding:0 2px}
+.quoteTrustBadges{display:flex;align-items:center;gap:6px 14px;flex-wrap:wrap}
+.quoteTrustBadges span{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#334155}
+.quoteTrustBadges span::before{content:"✓";font-size:12px;color:#187345;font-weight:900}
+.quoteTrust p{margin:6px 0 0;color:#526176;font-size:12px;line-height:1.45}
