@@ -51,6 +51,7 @@ export async function POST(request) {
 
     const miles = await roadsideMiles(location, coords);
     const quote = roadsideQuote(service, data.vehicleType, miles);
+    if (quote?.outsideServiceArea) return NextResponse.json({ error: 'outside_service_area' }, { status: 422 });
     if (!quote) return NextResponse.json({ error: 'Route unavailable' }, { status: 503 });
     if (data.quotedTotal !== quote.total) return NextResponse.json({ error: 'Refresh quote' }, { status: 409 });
     const price = quote.total;

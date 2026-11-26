@@ -29,7 +29,7 @@ const COPY = {
     priceTitle: 'Service price', priceCopy: 'No online payment required. We confirm availability before dispatch.',
     note: 'Request only — we will confirm service availability before dispatch. Any additional work will be discussed first.',
     received: 'Roadside request received', receivedInfo: 'Your roadside assistance request was received. We will contact you to confirm driver availability. This is not yet a confirmed dispatch.',
-    another: 'Request another service', callHelp: 'Prefer to speak with dispatch?', serviceArea: 'Fort Worth, Arlington and surrounding DFW areas. Availability varies by location.',
+    another: 'Request another service', callHelp: 'Prefer to speak with dispatch?', serviceArea: 'We serve locations within 30 driving miles of Burleson, TX 76028.',
     noGuarantee: 'For emergencies involving injury or immediate danger, call 911.', backTow: 'Need a tow instead?', towLink: 'Get an instant towing price',
     invalidService: 'Choose a roadside service.', error: 'We could not send your request. Please try again or call us.',
     extra: 'Spare tire changes require a serviceable spare. For lockouts, you must be authorized to access the vehicle.',
@@ -48,7 +48,7 @@ const COPY = {
     priceTitle: 'Precio del servicio', priceCopy: 'No necesitas pagar en línea. Confirmaremos disponibilidad antes de enviar ayuda.',
     note: 'Solo solicitud: confirmaremos disponibilidad antes de enviar ayuda. Hablaremos contigo antes de cualquier trabajo adicional.',
     received: 'Solicitud de asistencia recibida', receivedInfo: 'Recibimos tu solicitud de asistencia. Te contactaremos para confirmar disponibilidad. Todavía no se ha confirmado el envío de ayuda.',
-    another: 'Solicitar otro servicio', callHelp: '¿Prefieres hablar con nosotros?', serviceArea: 'Fort Worth, Arlington y zonas cercanas de DFW. La disponibilidad depende del lugar.',
+    another: 'Solicitar otro servicio', callHelp: '¿Prefieres hablar con nosotros?', serviceArea: 'Atendemos ubicaciones a un máximo de 30 millas por carretera desde Burleson, TX 76028.',
     noGuarantee: 'En caso de lesiones o peligro inmediato, llama al 911.', backTow: '¿Necesitas una grúa?', towLink: 'Cotiza una grúa al instante',
     invalidService: 'Selecciona un servicio.', error: 'No se pudo enviar tu solicitud. Inténtalo otra vez o llámanos.',
     extra: 'Para cambiar una llanta debes tener un repuesto en buenas condiciones. Para abrir un vehículo debes tener autorización.',
@@ -77,10 +77,12 @@ export default function RoadsideRequest({ locale = 'en' }) {
   const [calculating, setCalculating] = useState(false);
   const quoteKey = JSON.stringify({ service, vehicleType, location, coordinates });
   const quote = estimate?.key === quoteKey ? estimate.value : null;
+  const outside = estimate?.key === quoteKey && estimate.outside;
   async function calculate() {
     setError(''); setCalculating(true); setEstimate(null);
     try {
       const res = await fetch('/api/roadside-quote', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: quoteKey });
+      if (res.status === 422) { setEstimate({ key: quoteKey, outside: true }); return; }
       if (!res.ok) throw new Error();
       setEstimate({ key: quoteKey, value: await res.json() });
     } catch {
@@ -115,6 +117,7 @@ export default function RoadsideRequest({ locale = 'en' }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ quotedTotal: quote.total, service, vehicleType: options ? vehicleType : undefined, location, coordinates, name, phone, vehicle, notes, locale }),
       });
+      if (response.status === 422) { setEstimate({ key: quoteKey, outside: true }); setStatus('idle'); return; }
       if (response.status === 409) {
         setEstimate(null); setStatus('idle'); setError(es ? 'Vuelve a calcular el precio.' : 'Please calculate your updated price.'); return;
       }
@@ -185,8 +188,9 @@ export default function RoadsideRequest({ locale = 'en' }) {
               <input id="roadside-location" value={location} onChange={e => { setLocation(e.target.value); setCoordinates(null); }} placeholder={t.locationPlaceholder} maxLength={300} autoComplete="street-address" required />
               <button type="button" className="roadsideGps" onClick={locate} disabled={finding}>{finding ? t.finding : t.gps}</button>
 
-              <p>{es ? 'Desde el código postal 76028: primeras 10 millas incluidas; 10.1–20 millas +$15; desde 20.1 millas +$50.' : 'From ZIP 76028: first 10 miles included; 10.1–20 miles add $15; 20.1 miles and up add $50.'}</p>
+              <p>{es ? 'Desde el código postal 76028: primeras 10 millas incluidas; 10.1–20 millas +$15; 20.1–30 millas +$50.' : 'From ZIP 76028: first 10 miles included; 10.1–20 miles add $15; 20.1–30 miles add $50.'}</p>
               <button type="button" className="primary" disabled={calculating || finding || selectedPrice == null || location.trim().length < 5} onClick={calculate}>{calculating ? '…' : es ? 'Ver mi precio total' : 'See my total price'}</button>
+              {outside && <p role="alert">{es ? 'Fuera de nuestra zona de servicio. No ofrecemos asistencia a más de 30 millas por carretera del código postal 76028.' : 'Outside our service area. We do not offer roadside assistance beyond 30 driving miles from ZIP 76028.'}</p>}
               {quote && <p role="status">{es ? 'Precio base' : 'Base price'}: ${quote.base} + {es ? 'traslado' : 'travel'} ({quote.miles} mi): ${quote.travel}. <strong>Total: ${quote.total}</strong></p>}
 
               <div className="twoCol">

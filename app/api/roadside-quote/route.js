@@ -11,5 +11,6 @@ export async function POST(request) {
   if (c != null && (!Number.isFinite(c.lat) || !Number.isFinite(c.lng) || Math.abs(c.lat) > 90 || Math.abs(c.lng) > 180))
     return NextResponse.json({ error: 'Invalid GPS' }, { status: 400 });
   const quote = roadsideQuote(data.service, data.vehicleType, await roadsideMiles(data.location.trim(), c));
+  if (quote?.outsideServiceArea) return NextResponse.json({ error: 'outside_service_area' }, { status: 422 });
   return quote ? NextResponse.json(quote) : NextResponse.json({ error: 'Route unavailable' }, { status: 503 });
 }
