@@ -67,7 +67,7 @@ export async function POST(request) {
       ['Customer name', name],
       ['Phone', phone],
       ['Location', location],
-      ['Driving distance from ZIP 76028 (one way)', miles === null ? 'Unavailable — confirm with dispatch' : miles.toFixed(1) + ' mi'],
+      ['Driving distance from the Burleson dispatch base (one way)', miles === null ? 'Unavailable — confirm with dispatch' : miles.toFixed(1) + ' mi'],
       ['Vehicle', vehicle],
       ['Details', notes || 'Not provided'],
       ['Site language', locale === 'es' ? 'Spanish' : 'English'],
