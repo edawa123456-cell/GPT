@@ -655,3 +655,49 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid #14
   .ttodDesktopRefresh .how .sectionKicker {color:var(--ttod-red);}
   .ttodDesktopRefresh .how .num {background:var(--ttod-red);}
 }
+
+/* Mobile refinement: prioritize quote fields over decorative header and hero.
+   Draft branch only. Keep all contact, language and menu actions accessible. */
+@media(max-width:700px) {
+ .ttodDesktopRefresh .nav {
+   min-height:0; height:auto;
+   display:grid; grid-template-columns:minmax(0,1fr) auto auto;
+   gap:5px 9px; padding:11px 14px 10px;
+ }
+ .ttodDesktopRefresh .nav .brand {
+   grid-column:1/-1; font-size:22px; letter-spacing:-1.1px;
+   margin-bottom:0;
+ }
+ .ttodDesktopRefresh .nav .siteMenu {justify-self:start;}
+ .ttodDesktopRefresh .nav .siteMenu summary {min-height:35px; padding:6px 8px;}
+ .ttodDesktopRefresh .nav .callLink {min-height:35px; padding:7px 11px;}
+ .ttodDesktopRefresh .hero {padding:0 10px; margin-bottom:21px;}
+ .ttodDesktopRefresh .heroCopy {
+   min-height:0; height:auto; border-radius:0 0 15px 15px;
+   padding:17px 16px 19px; justify-content:center;
+   background:
+     linear-gradient(90deg,rgba(8,13,22,.91),rgba(8,13,22,.64)),
+     url('/tow-truck-fleet.png') center 55% / cover no-repeat;
+ }
+ .ttodDesktopRefresh .hero .eyebrow {
+   font-size:9px; padding:6px 8px; letter-spacing:.8px;
+ }
+ .ttodDesktopRefresh .hero h1 {
+   font-size:clamp(26px,7.2vw,33px);
+   letter-spacing:-.9px; line-height:1.13;
+   margin:11px 0 7px;
+ }
+ .ttodDesktopRefresh .hero .lede {
+   font-size:12px; line-height:1.4; max-width:none;
+ }
+ /* Trust statements already appear by the quote; avoid wasting the first screen. */
+ .ttodDesktopRefresh .hero .trustRow {display:none;}
+ .ttodDesktopRefresh .hero .bookingCard {
+   margin:-2px 0 0; padding:15px 14px 19px;
+   border-radius:15px; box-shadow:0 8px 17px rgba(15,20,29,.10);
+ }
+ .ttodDesktopRefresh .ttodServiceTabs {margin-bottom:14px;}
+ .ttodDesktopRefresh .ttodServiceTabs a {min-height:39px;}
+ .ttodDesktopRefresh .hero .stepTitle {font-size:21px;margin-bottom:10px;}
+ .ttodDesktopRefresh .hero .bookingCard label {margin-top:10px;}
+}
