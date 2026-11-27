@@ -367,3 +367,106 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid #14
  .ttodDesktopRefresh .hero {grid-template-columns:minmax(0,1fr) minmax(0,520px);padding:25px 22px;gap:18px;}
  .ttodDesktopRefresh .hero .bookingCard {padding:22px;}
 }
+
+
+/* Final alignment pass to the approved desktop proposal. */
+.ttodDesktopHeadline,.ttodDesktopLede,.ttodServiceTabs {display:none;}
+.ttodTrustIcon {display:none;}
+@media (min-width:1100px) {
+ .ttodDesktopRefresh .nav {max-width:none; padding-left:3.3vw; padding-right:3.3vw;}
+ .ttodDesktopRefresh .hero {
+   max-width:none; width:100%; min-height:620px; 
+   margin:0; padding:39px 3.3vw 32px;
+   grid-template-columns:minmax(0,1fr) minmax(0,590px);
+   gap:clamp(30px,4vw,65px);
+   background-position:center 58%;
+ }
+ .ttodDesktopRefresh .heroCopy {
+   min-height:540px;
+   padding:18px 0 22px;
+   justify-content:flex-start;
+ }
+ .ttodDesktopRefresh .ttodOriginalHeadline,
+ .ttodDesktopRefresh .ttodOriginalLede {display:none;}
+ .ttodDesktopRefresh .ttodDesktopHeadline,
+ .ttodDesktopRefresh .ttodDesktopLede {display:inline;}
+ .ttodDesktopRefresh .hero h1 {
+   max-width:760px; font-size:clamp(43px,3.7vw,64px);
+   line-height:1.06; letter-spacing:-1.9px;
+   margin:24px 0 17px;
+ }
+ .ttodDesktopRefresh .hero h1 em {
+   color:var(--ttod-red); font-style:inherit;
+   text-shadow:0 1px 8px rgba(4,5,8,.12);
+ }
+ .ttodDesktopRefresh .hero .lede {font-size:19px; max-width:500px; line-height:1.5;}
+ .ttodDesktopRefresh .hero .trustRow {
+   margin-top:auto; display:flex; flex-wrap:nowrap; gap:0;
+   max-width:100%; align-items:stretch;
+ }
+ .ttodDesktopRefresh .hero .trustRow span {
+   min-width:0; max-width:180px; padding:0 20px;
+   background:transparent; border:0; border-right:1px solid rgba(255,255,255,.60);
+   border-radius:0; color:#fff; display:flex;
+   flex-direction:column; justify-content:center; align-items:center; text-align:center;
+   font-weight:800; line-height:1.35; font-size:13px;
+ }
+ .ttodDesktopRefresh .hero .trustRow span:first-child {padding-left:3px;}
+ .ttodDesktopRefresh .hero .trustRow span:last-child {border-right:0;}
+ .ttodDesktopRefresh .ttodTrustIcon {
+   display:grid; place-items:center; width:44px; height:44px;
+   margin-bottom:9px; background:#fff; color:var(--ttod-red);
+   border-radius:13px; font-size:28px; font-style:normal; font-weight:900;
+   line-height:1;
+ }
+ .ttodDesktopRefresh .hero .bookingCard {
+   position:relative; z-index:2; margin-bottom:-56px;
+   padding:20px 26px 25px; border:1px solid #edf0f4;
+   border-top:2px solid var(--ttod-red);
+   border-radius:25px;
+   box-shadow:0 20px 35px rgba(0,0,0,.20);
+ }
+ .ttodDesktopRefresh .ttodServiceTabs {
+   display:grid; grid-template-columns:1fr 1fr; gap:0;
+   margin:0 0 20px; padding:5px; border-radius:12px; background:#edf0f4;
+ }
+ .ttodDesktopRefresh .ttodServiceTabs a {
+   display:flex; gap:10px; align-items:center; justify-content:center;
+   min-height:46px; padding:8px 10px; border-radius:9px;
+   font-size:14px; font-weight:900; text-decoration:none;
+   color:#182230; white-space:nowrap;
+ }
+ .ttodDesktopRefresh .ttodServiceTabs a.ttodActiveTab {
+   background:var(--ttod-red); color:#fff;
+   box-shadow:0 3px 9px rgba(160,0,20,.10);
+ }
+ .ttodDesktopRefresh .ttodServiceTabs a:not(.ttodActiveTab):hover {background:#fff;}
+ .ttodDesktopRefresh .ttodServiceTabs a span {font-size:17px; line-height:1;}
+ .ttodDesktopRefresh .hero .stepTitle {font-size:26px; letter-spacing:-.9px; margin:0 0 14px;}
+ .ttodDesktopRefresh .hero .bookingCard label {font-size:13px;}
+ .ttodDesktopRefresh .hero .bookingCard input:not([type='checkbox']),
+ .ttodDesktopRefresh .hero .bookingCard select {min-height:46px;}
+ .ttodDesktopRefresh .ttodDesktopInfoStrip {
+   max-width:none; width:100%; margin:0 0 57px; padding:24px 3.3vw;
+   position:relative; z-index:1; background:#f6f7f9;
+   grid-template-columns:repeat(3,minmax(0,1fr));
+ }
+ .ttodDesktopRefresh .ttodDesktopInfoStrip > div {
+   display:flex; align-items:flex-start; gap:14px; padding:2px 23px;
+ }
+ .ttodDesktopRefresh .ttodDesktopInfoStrip > div:first-child {padding-left:0;}
+ .ttodDesktopRefresh .ttodDesktopInfoStrip > div svg {
+   display:block; width:32px; height:32px; flex:none; color:var(--ttod-red);
+ }
+ .ttodDesktopRefresh .ttodDesktopInfoStrip > div section {min-width:0;}
+ .ttodDesktopRefresh .ttodDesktopInfoStrip > div strong {font-size:14px;}
+ .ttodDesktopRefresh .ttodDesktopInfoStrip > div span {font-size:12px;}
+}
+@media (min-width:1100px) and (max-width:1350px) {
+ .ttodDesktopRefresh .hero {grid-template-columns:minmax(0,1fr) minmax(0,525px);gap:23px;}
+ .ttodDesktopRefresh .hero h1 {font-size:43px;}
+ .ttodDesktopRefresh .hero .lede {font-size:16px;}
+ .ttodDesktopRefresh .ttodDesktopNav {gap:12px;}
+ .ttodDesktopRefresh .hero .trustRow span {padding:0 10px;font-size:11px;}
+ .ttodDesktopRefresh .ttodDesktopInfoStrip > div {padding:2px 13px;}
+}
