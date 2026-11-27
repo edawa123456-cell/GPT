@@ -658,7 +658,7 @@ try { if (!isTrackingExcluded() && typeof window !== 'undefined' && window.gtag)
           <a href={isSpanish ? "/es" : "/"} aria-current="page">{isSpanish ? "Inicio" : "Home"}</a>
           <a href="#booking">{isSpanish ? "Grúas" : "Towing"}</a>
           <a href={isSpanish ? "/es/roadside-assistance" : "/roadside-assistance"}>{isSpanish ? "Asistencia vial" : "Roadside Assistance"}</a>
-          <a href={isSpanish ? "/es/services" : "/services"}>{isSpanish ? "Servicios" : "Service Areas"}</a>
+          <a href="#service-area">{isSpanish ? "Áreas de servicio" : "Service Areas"}</a>
           <a href={isSpanish ? "/es/about" : "/about"}>{isSpanish ? "Nosotros" : "About"}</a>
         </nav>
         <SiteMenu locale={locale} />
@@ -689,9 +689,9 @@ try { if (!isTrackingExcluded() && typeof window !== 'undefined' && window.gtag)
           </p>
 
           <div className="trustRow">
-            <span><b aria-hidden="true" className="ttodTrustIcon">⚡</b>{isSpanish ? "Precio instantáneo" : "Instant Price Online"}</span>
-            <span><b aria-hidden="true" className="ttodTrustIcon">▦</b>{isSpanish ? "Elige la hora" : "Choose Your Time"}</span>
-            <span><b aria-hidden="true" className="ttodTrustIcon">▰</b>{isSpanish ? "Paga al recoger" : "Pay at Pickup"}</span>
+            <span><b aria-hidden="true" className="ttodTrustIcon">⚡</b><span className="ttodTrustTextMobile">{t("Upfront pricing")}</span><span className="ttodTrustTextDesktop">{isSpanish ? "Precio instantáneo" : "Instant Price Online"}</span></span>
+            <span><b aria-hidden="true" className="ttodTrustIcon">▦</b><span className="ttodTrustTextMobile">{isSpanish ? t("Online booking") : "Pay at pickup"}</span><span className="ttodTrustTextDesktop">{isSpanish ? "Elige la hora" : "Choose Your Time"}</span></span>
+            <span><b aria-hidden="true" className="ttodTrustIcon">▰</b><span className="ttodTrustTextMobile">{t("Local trucks")}</span><span className="ttodTrustTextDesktop">{isSpanish ? "Paga al recoger" : "Pay at Pickup"}</span></span>
           </div>
         </div>
 
@@ -1288,7 +1288,7 @@ try { if (!isTrackingExcluded() && typeof window !== 'undefined' && window.gtag)
         </div>
       </section>
 
-      <aside className="ttodDesktopInfoStrip" aria-label={isSpanish ? "Información del servicio" : "Service information"}>
+      <aside id="service-area" className="ttodDesktopInfoStrip" aria-label={isSpanish ? "Información del servicio" : "Service information"}>
         <div>
           <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M12 22s7-7.4 7-13a7 7 0 1 0-14 0c0 5.6 7 13 7 13Z"/><circle cx="12" cy="9" r="2.3"/></svg>
           <section><strong>{isSpanish ? "Área de servicio" : "Service Area"}</strong><span>{isSpanish ? "Área metropolitana de DFW · Fort Worth, Arlington, Mansfield, Burleson y alrededores" : "DFW Metroplex · Fort Worth, Arlington, Mansfield, Burleson & nearby areas"}</span></section>
