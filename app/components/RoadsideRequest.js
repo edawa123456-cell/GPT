@@ -31,7 +31,7 @@ const COPY = {
     priceTitle: 'Service price', priceCopy: 'No online payment required. We confirm availability before dispatch.',
     note: 'Request only — we will confirm service availability before dispatch. Any additional work will be discussed first.',
     received: 'Roadside request received', receivedInfo: 'Your roadside assistance request was received. We will contact you to confirm driver availability. This is not yet a confirmed dispatch.',
-    another: 'Request another service', callHelp: 'Prefer to speak with dispatch?', serviceArea: 'We serve locations within 30 driving miles of Burleson, TX 76028.',
+    another: 'Request another service', callHelp: 'Prefer to speak with dispatch?', serviceArea: 'We serve locations within 30 driving miles of our dispatch base in Burleson.',
     noGuarantee: 'For emergencies involving injury or immediate danger, call 911.', backTow: 'Need a tow instead?', towLink: 'Get an instant towing price',
     invalidService: 'Choose a roadside service.', error: 'We could not send your request. Please try again or call us.',
     extra: 'Spare tire changes require a serviceable spare. For lockouts, you must be authorized to access the vehicle.',
@@ -50,7 +50,7 @@ const COPY = {
     priceTitle: 'Precio del servicio', priceCopy: 'No necesitas pagar en línea. Confirmaremos disponibilidad antes de enviar ayuda.',
     note: 'Solo solicitud: confirmaremos disponibilidad antes de enviar ayuda. Hablaremos contigo antes de cualquier trabajo adicional.',
     received: 'Solicitud de asistencia recibida', receivedInfo: 'Recibimos tu solicitud de asistencia. Te contactaremos para confirmar disponibilidad. Todavía no se ha confirmado el envío de ayuda.',
-    another: 'Solicitar otro servicio', callHelp: '¿Prefieres hablar con nosotros?', serviceArea: 'Atendemos ubicaciones a un máximo de 30 millas por carretera desde Burleson, TX 76028.',
+    another: 'Solicitar otro servicio', callHelp: '¿Prefieres hablar con nosotros?', serviceArea: 'Atendemos ubicaciones a un máximo de 30 millas por carretera desde nuestra base en Burleson.',
     noGuarantee: 'En caso de lesiones o peligro inmediato, llama al 911.', backTow: '¿Necesitas una grúa?', towLink: 'Cotiza una grúa al instante',
     invalidService: 'Selecciona un servicio.', error: 'No se pudo enviar tu solicitud. Inténtalo otra vez o llámanos.',
     extra: 'Para cambiar una llanta debes tener un repuesto en buenas condiciones. Para abrir un vehículo debes tener autorización.',
@@ -209,9 +209,9 @@ export default function RoadsideRequest({ locale = 'en' }) {
               <RoadsideAddressInput id="roadside-location" value={location} onChange={value => { setLocation(value); setCoordinates(null); }} placeholder={t.locationPlaceholder} locale={locale} />
               <button type="button" className="roadsideGps" onClick={locate} disabled={finding}>{finding ? t.finding : t.gps}</button>
 
-              <p>{es ? 'Desde el código postal 76028: primeras 10 millas incluidas; 10.1–20 millas +$15; 20.1–30 millas +$50.' : 'From ZIP 76028: first 10 miles included; 10.1–20 miles add $15; 20.1–30 miles add $50.'}</p>
+              <p>{es ? 'Desde nuestra base en Burleson: primeras 10 millas incluidas; 10.1–20 millas +$15; 20.1–30 millas +$50.' : 'From our Burleson base: first 10 miles included; 10.1–20 miles add $15; 20.1–30 miles add $50.'}</p>
               <button type="button" className="primary" disabled={calculating || finding || selectedPrice == null || location.trim().length < 5} onClick={calculate}>{calculating ? '…' : es ? 'Ver mi precio total' : 'See my total price'}</button>
-              {outside && <p role="alert">{es ? 'Fuera de nuestra zona de servicio. No ofrecemos asistencia a más de 30 millas por carretera del código postal 76028.' : 'Outside our service area. We do not offer roadside assistance beyond 30 driving miles from ZIP 76028.'}</p>}
+              {outside && <p role="alert">{es ? 'Fuera de nuestra zona de servicio. No ofrecemos asistencia a más de 30 millas por carretera de nuestra base en Burleson.' : 'Outside our service area. We do not offer roadside assistance beyond 30 driving miles from our Burleson base.'}</p>}
               {quote && <p role="status">{es ? 'Precio base' : 'Base price'}: ${quote.base} + {es ? 'traslado' : 'travel'} ({quote.miles} mi): ${quote.travel}. <strong>Total: ${quote.total}</strong></p>}
 
               <div className="twoCol">
