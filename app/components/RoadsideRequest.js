@@ -125,6 +125,11 @@ export default function RoadsideRequest({ locale = 'en' }) {
     const currentHours = roadsideHours();
     setHours(currentHours);
     if (!quote) return;
+    const digits = phone.replace(/\D/g, '');
+    if (digits.length < 10 || digits.length > 15) {
+      setError(es ? 'Ingresa un número de teléfono válido de 10 a 15 dígitos.' : 'Enter a valid phone number with 10 to 15 digits.');
+      return;
+    }
     setStatus('sending');
     setError('');
     try {
@@ -137,7 +142,19 @@ export default function RoadsideRequest({ locale = 'en' }) {
       if (response.status === 409) {
         setEstimate(null); setStatus('idle'); setError(es ? 'Vuelve a calcular el precio.' : 'Please calculate your updated price.'); return;
       }
-      if (!response.ok) throw new Error('Request could not be delivered');
+      if (!response.ok) {
+        if (response.status === 400) {
+          setError(es ? 'Revisa el nombre, teléfono, vehículo y ubicación. El teléfono debe tener entre 10 y 15 dígitos.' : 'Check your name, phone number, vehicle and location. Phone numbers must have 10–15 digits.');
+        } else if (response.status === 503) {
+          setError(es ? 'El sistema de solicitudes no está disponible en este momento. Llámanos para pedir ayuda.' : 'Online requests are temporarily unavailable. Please call us for assistance.');
+        } else if (response.status === 502) {
+          setError(es ? 'No pudimos entregar la solicitud a nuestro despacho. Llámanos para pedir ayuda.' : 'We could not deliver your request to dispatch. Please call us for assistance.');
+        } else {
+          setError(es ? 'No se pudo enviar la solicitud. Llámanos o inténtalo otra vez.' : 'Could not send your request. Please call us or try again.');
+        }
+        setStatus('idle');
+        return;
+      }
       const result = await response.json();
       setRequestedAfterHours(Boolean(result.afterHoursRequest));
       trackEvent('roadside_request', { language: locale, roadsideService: service });
