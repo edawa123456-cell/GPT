@@ -69,8 +69,8 @@ export default function RoadsideRequest({ locale = 'en' }) {
     return () => { clearInterval(timer); window.removeEventListener('focus', refresh); };
   }, []);
   const closedMessage = hours && !hours.open && (es
-    ? `Puedes consultar el precio ahora. Aceptamos solicitudes de nuevo ${hours.tomorrow ? 'mañana' : 'hoy'} a las ${hours.opensAt}:00 a. m. (hora central).`
-    : `You can check your price now. Requests reopen ${hours.tomorrow ? 'tomorrow' : 'today'} at ${hours.opensAt}:00 AM Central.`);
+    ? `Puedes consultar el precio ahora. Aceptamos solicitudes de nuevo hoy a las ${hours.opensAt}:00 a. m. (hora central).`
+    : `You can check your price now. Requests reopen today at ${hours.opensAt}:00 AM Central.`);
   const [service, setService] = useState('');
   const [vehicleType, setVehicleType] = useState('');
   const options = vehicleOptions(service);
@@ -167,7 +167,7 @@ export default function RoadsideRequest({ locale = 'en' }) {
           <p className="lede">{t.intro}</p>
           <div className="trustRow"><span>{es ? 'Servicio local' : 'Local DFW service'}</span><span>{es ? 'Sin pago en línea' : 'No online payment'}</span></div>
           <p className="roadsideArea">{t.serviceArea}</p>
-          <p>{es ? 'Horario de solicitudes: lunes a sábado, 7 a. m.–7 p. m.; domingo, 10 a. m.–6 p. m. (hora central).' : 'Request hours: Mon–Sat, 7 AM–7 PM; Sunday, 10 AM–6 PM (Central).'}</p>
+          <p>{es ? 'Horario de solicitudes: todos los días, de 6 a. m. a medianoche (hora central).' : 'Request hours: daily, 6 AM to midnight (Central).'}</p>
           {closedMessage && <p role="status">{closedMessage}</p>}
         </div>
 
