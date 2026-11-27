@@ -642,7 +642,7 @@ try { if (!isTrackingExcluded() && typeof window !== 'undefined' && window.gtag)
   }
 
   return (
-    <main lang={locale}>
+    <main lang={locale} className="ttodDesktopRefresh">
       <a className="skipLink" href="#booking">{isSpanish ? "Ir al formulario" : "Skip to quote form"}</a>
       <header className="nav">
    <a href={isSpanish ? "/es" : "/"} className="brand">
@@ -669,11 +669,11 @@ try { if (!isTrackingExcluded() && typeof window !== 'undefined' && window.gtag)
     alt="Local Tow Truck On Demand fleet"
   />
 </div>
-        <div className="eyebrow">{t("SERVING DFW & SURROUNDING AREAS")}</div>
+        <div className="eyebrow">{isSpanish ? "SERVICIO EN EL ÁREA METROPOLITANA DE DFW" : "SERVING THE DFW METROPLEX"}</div>
 
-          <h1>{isSpanish ? t("Need a tow?") : "Fort Worth & DFW towing"}</h1>
+          <h1>{isSpanish ? t("Need a tow?") : "Towing & roadside assistance"}</h1>
 
-          <p className="lede">{isSpanish ? t("Enter your pickup and destination, see your price, and request service online.") : "Flatbed towing in Fort Worth, Arlington and surrounding DFW areas. Enter your pickup and destination to see your price instantly, then request your tow online."}</p>
+          <p className="lede">{isSpanish ? t("Enter your pickup and destination, see your price, and request service online.") : "Get an instant towing price and request service online. Serving the DFW metroplex, including Fort Worth, Arlington, Mansfield, Burleson and nearby communities."}</p>
 
           <div className="trustRow">
             <span>{t("Upfront pricing")}</span>
