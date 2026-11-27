@@ -654,6 +654,13 @@ try { if (!isTrackingExcluded() && typeof window !== 'undefined' && window.gtag)
     OnDemand
   </span>
 </a>
+        <nav className="ttodDesktopNav" aria-label={isSpanish ? "Navegación principal" : "Main navigation"}>
+          <a href={isSpanish ? "/es" : "/"} aria-current="page">{isSpanish ? "Inicio" : "Home"}</a>
+          <a href="#booking">{isSpanish ? "Grúas" : "Towing"}</a>
+          <a href={isSpanish ? "/es/roadside-assistance" : "/roadside-assistance"}>{isSpanish ? "Asistencia vial" : "Roadside Assistance"}</a>
+          <a href={isSpanish ? "/es/services" : "/services"}>{isSpanish ? "Servicios" : "Service Areas"}</a>
+          <a href={isSpanish ? "/es/about" : "/about"}>{isSpanish ? "Nosotros" : "About"}</a>
+        </nav>
         <SiteMenu locale={locale} />
         <a href={languageHref} hrefLang={isSpanish ? "en" : "es"} className="callLink languageLink">{isSpanish ? "English" : "Español"}</a>
         <a
@@ -1266,6 +1273,12 @@ try { if (!isTrackingExcluded() && typeof window !== 'undefined' && window.gtag)
 
         </div>
       </section>
+
+      <aside className="ttodDesktopInfoStrip" aria-label={isSpanish ? "Información del servicio" : "Service information"}>
+        <div><strong>{isSpanish ? "Área de servicio" : "Service Area"}</strong><span>{isSpanish ? "Área metropolitana de DFW · Fort Worth, Arlington, Mansfield, Burleson y alrededores" : "DFW Metroplex · Fort Worth, Arlington, Mansfield, Burleson & nearby areas"}</span></div>
+        <div><strong>{isSpanish ? "Horario" : "Business Hours"}</strong><span>{isSpanish ? "Consulta el horario y cargos fuera de horario al cotizar" : "Check request hours and after-hours pricing when quoting"}</span></div>
+        <div><strong>{isSpanish ? "Paga al recoger el vehículo" : "Payment at Pickup"}</strong><span>{isSpanish ? "Efectivo, tarjeta, Zelle o Cash App" : "Cash, Card, Zelle or Cash App · No online payment"}</span></div>
+      </aside>
 
       <section className="how">
 
