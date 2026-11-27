@@ -678,18 +678,32 @@ try { if (!isTrackingExcluded() && typeof window !== 'undefined' && window.gtag)
 </div>
         <div className="eyebrow">{isSpanish ? "SERVICIO EN EL ÁREA METROPOLITANA DE DFW" : "SERVING THE DFW METROPLEX"}</div>
 
-          <h1>{isSpanish ? t("Need a tow?") : "Towing & roadside assistance"}</h1>
+          <h1>
+            <span className="ttodOriginalHeadline">{isSpanish ? t("Need a tow?") : "Towing across the DFW Metroplex"}</span>
+            <span className="ttodDesktopHeadline">{isSpanish ? <>Grúas y asistencia<br/>en carretera en <em>DFW</em></> : <>Towing &amp; Roadside<br/>Assistance in <em>DFW</em></>}</span>
+          </h1>
 
-          <p className="lede">{isSpanish ? t("Enter your pickup and destination, see your price, and request service online.") : "Get an instant towing price and request service online. Serving the DFW metroplex, including Fort Worth, Arlington, Mansfield, Burleson and nearby communities."}</p>
+          <p className="lede">
+            <span className="ttodOriginalLede">{isSpanish ? t("Enter your pickup and destination, see your price, and request service online.") : "Get an instant towing price and request service online across the DFW metroplex, including Fort Worth, Arlington, Mansfield and Burleson."}</span>
+            <span className="ttodDesktopLede">{isSpanish ? "Obtén tu precio al instante, solicita la grúa en línea y paga al recoger tu vehículo." : "Get an instant towing price, request your tow online, and pay at pickup."}</span>
+          </p>
 
           <div className="trustRow">
-            <span>{t("Upfront pricing")}</span>
-            <span>{isSpanish ? t("Online booking") : "Pay at pickup"}</span>
-            <span>{t("Local trucks")}</span>
+            <span><b aria-hidden="true" className="ttodTrustIcon">⚡</b>{isSpanish ? "Precio instantáneo" : "Instant Price Online"}</span>
+            <span><b aria-hidden="true" className="ttodTrustIcon">▦</b>{isSpanish ? "Elige la hora" : "Choose Your Time"}</span>
+            <span><b aria-hidden="true" className="ttodTrustIcon">▰</b>{isSpanish ? "Paga al recoger" : "Pay at Pickup"}</span>
           </div>
         </div>
 
         <div className="bookingCard" id="booking">
+          <nav className="ttodServiceTabs" aria-label={isSpanish ? "Elegir servicio" : "Choose service"}>
+            <a className="ttodActiveTab" href="#booking" aria-current="page">
+              <span aria-hidden="true">↗</span>{isSpanish ? "Solicitar grúa" : "Tow My Vehicle"}
+            </a>
+            <a href={isSpanish ? "/es/roadside-assistance" : "/roadside-assistance"}>
+              <span aria-hidden="true">✚</span>{isSpanish ? "Asistencia vial" : "Roadside Assistance"}
+            </a>
+          </nav>
 
           {!booked ? (
             <form onSubmit={getQuote}>
@@ -1275,9 +1289,18 @@ try { if (!isTrackingExcluded() && typeof window !== 'undefined' && window.gtag)
       </section>
 
       <aside className="ttodDesktopInfoStrip" aria-label={isSpanish ? "Información del servicio" : "Service information"}>
-        <div><strong>{isSpanish ? "Área de servicio" : "Service Area"}</strong><span>{isSpanish ? "Área metropolitana de DFW · Fort Worth, Arlington, Mansfield, Burleson y alrededores" : "DFW Metroplex · Fort Worth, Arlington, Mansfield, Burleson & nearby areas"}</span></div>
-        <div><strong>{isSpanish ? "Horario" : "Business Hours"}</strong><span>{isSpanish ? "Consulta el horario y cargos fuera de horario al cotizar" : "Check request hours and after-hours pricing when quoting"}</span></div>
-        <div><strong>{isSpanish ? "Paga al recoger el vehículo" : "Payment at Pickup"}</strong><span>{isSpanish ? "Efectivo, tarjeta, Zelle o Cash App" : "Cash, Card, Zelle or Cash App · No online payment"}</span></div>
+        <div>
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M12 22s7-7.4 7-13a7 7 0 1 0-14 0c0 5.6 7 13 7 13Z"/><circle cx="12" cy="9" r="2.3"/></svg>
+          <section><strong>{isSpanish ? "Área de servicio" : "Service Area"}</strong><span>{isSpanish ? "Área metropolitana de DFW · Fort Worth, Arlington, Mansfield, Burleson y alrededores" : "DFW Metroplex · Fort Worth, Arlington, Mansfield, Burleson & nearby areas"}</span></section>
+        </div>
+        <div>
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 3"/></svg>
+          <section><strong>{isSpanish ? "Horario de servicio" : "Service Hours"}</strong><span>{isSpanish ? "Horario habitual: lunes a sábado, 8 AM–6 PM · Recargo fuera de horario" : "Regular hours: Mon–Sat, 8 AM–6 PM · After-hours surcharge applies"}</span></section>
+        </div>
+        <div>
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M3 10h18M6 15h5"/></svg>
+          <section><strong>{isSpanish ? "Pago al recoger" : "Payment at Pickup"}</strong><span>{isSpanish ? "Efectivo, tarjeta, Zelle o Cash App · Sin pago en línea" : "Cash, Card, Zelle or Cash App · No online payment"}</span></section>
+        </div>
       </aside>
 
       <section className="how">
