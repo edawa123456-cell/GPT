@@ -6,7 +6,7 @@ export async function roadsideMiles(address, coords, key = process.env.GOOGLE_MA
       method: 'POST', cache: 'no-store', signal: AbortSignal.timeout(5000),
       headers: { 'Content-Type': 'application/json', 'X-Goog-Api-Key': key, 'X-Goog-FieldMask': 'routes.distanceMeters' },
       body: JSON.stringify({
-        origin: { address: 'Burleson, TX 76028, USA' },
+        origin: { address: '12612 Clermont Cir, Burleson, TX 76028, USA' },
         destination: coords ? { location: { latLng: { latitude: coords.lat, longitude: coords.lng } } } : { address },
         travelMode: 'DRIVE'
       })
