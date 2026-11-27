@@ -69,8 +69,8 @@ export default function RoadsideRequest({ locale = 'en' }) {
     return () => { clearInterval(timer); window.removeEventListener('focus', refresh); };
   }, []);
   const closedMessage = hours && !hours.open && (es
-    ? `Puedes consultar el precio ahora. Aceptamos solicitudes de nuevo hoy a las ${hours.opensAt}:00 a. m. (hora central).`
-    : `You can check your price now. Requests reopen today at ${hours.opensAt}:00 AM Central.`);
+    ? `Puedes solicitar asistencia ahora. El horario de servicio se reanuda a las ${hours.opensAt}:00 a. m. (hora central). No se enviará ayuda hasta confirmar la disponibilidad.`
+    : `You can request service now. Service hours resume at ${hours.opensAt}:00 AM Central. No driver is dispatched until we confirm availability.`);
   const [service, setService] = useState('');
   const [vehicleType, setVehicleType] = useState('');
   const options = vehicleOptions(service);
@@ -84,6 +84,7 @@ export default function RoadsideRequest({ locale = 'en' }) {
   const [vehicle, setVehicle] = useState('');
   const [notes, setNotes] = useState('');
   const [status, setStatus] = useState('idle');
+  const [requestedAfterHours, setRequestedAfterHours] = useState(false);
   const [error, setError] = useState('');
 
   const [estimate, setEstimate] = useState(null);
@@ -123,7 +124,7 @@ export default function RoadsideRequest({ locale = 'en' }) {
     if (!service) { setError(t.invalidService); return; }
     const currentHours = roadsideHours();
     setHours(currentHours);
-    if (!quote || !currentHours.open) return;
+    if (!quote) return;
     setStatus('sending');
     setError('');
     try {
@@ -132,15 +133,13 @@ export default function RoadsideRequest({ locale = 'en' }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ quotedTotal: quote.total, service, vehicleType: options ? vehicleType : undefined, location, coordinates, name, phone, vehicle, notes, locale }),
       });
-      if (response.status === 403) {
-        const result = await response.json();
-        if (result.error === 'closed') { setHours(result.hours); setStatus('idle'); return; }
-      }
       if (response.status === 422) { setEstimate({ key: quoteKey, outside: true }); setStatus('idle'); return; }
       if (response.status === 409) {
         setEstimate(null); setStatus('idle'); setError(es ? 'Vuelve a calcular el precio.' : 'Please calculate your updated price.'); return;
       }
       if (!response.ok) throw new Error('Request could not be delivered');
+      const result = await response.json();
+      setRequestedAfterHours(Boolean(result.afterHoursRequest));
       trackEvent('roadside_request', { language: locale, roadsideService: service });
       setStatus('success');
     } catch {
@@ -176,9 +175,9 @@ export default function RoadsideRequest({ locale = 'en' }) {
             <div className="confirmation" role="status">
               <div className="check">✓</div>
               <h2>{t.received}</h2>
-              <p>{t.receivedInfo}</p>
+              <p>{requestedAfterHours ? (es ? 'Recibimos tu solicitud fuera del horario de servicio. Nos pondremos en contacto contigo cuando se reanude el servicio para confirmar disponibilidad. No se ha enviado ningún conductor.' : 'We received your request outside service hours. We will contact you when service resumes to confirm availability. No driver has been dispatched.') : t.receivedInfo}</p>
               <button type="button" className="primary" onClick={() => {
-                setEstimate(null); setStatus('idle'); setService(''); setVehicleType(''); setLocation(''); setCoordinates(null); setName(''); setPhone(''); setVehicle(''); setNotes('');
+                setRequestedAfterHours(false); setEstimate(null); setStatus('idle'); setService(''); setVehicleType(''); setLocation(''); setCoordinates(null); setName(''); setPhone(''); setVehicle(''); setNotes('');
               }}>{t.another}</button>
             </div>
           ) : (
@@ -229,7 +228,7 @@ export default function RoadsideRequest({ locale = 'en' }) {
                 <p>{t.priceCopy}</p>
               </div>
 
-              <button type="submit" className="primary" disabled={!hours?.open || !quote || status === 'sending'}>{status === 'sending' ? t.sending : t.request + (quote ? ' — $' + quote.total : '')}</button>
+              <button type="submit" className="primary" disabled={!quote || status === 'sending'}>{status === 'sending' ? t.sending : t.request + (quote ? ' — $' + quote.total : '')}</button>
               {closedMessage && <p>{closedMessage}</p>}
               <p className="finePrint">{t.note}</p>
               {error && <p className="errorBox" role="alert">{error}</p>}
