@@ -233,181 +233,137 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid #14
 .roadsideAddressHint{font-size:12px;color:#526176;margin:6px 0 0;line-height:1.45}
 
 
-/* TTOD desktop-only homepage refresh — isolated from other pages and mobile.
-   No changes to booking logic, API forms, map suggestions or tracking. */
-@media (min-width: 1001px) {
-  .ttodDesktopRefresh {
-    --ttod-red: #c91022;
-    --ttod-red-dark: #a90d1d;
-    --ttod-charcoal: #131a23;
-    --ttod-cream: #f8f8f7;
-    background: linear-gradient(180deg,#fff 0%,#f7f8fa 58rem,#f7f8fa 100%);
-  }
-  .ttodDesktopRefresh .nav {
-    max-width: 1440px;
-    height: 88px;
-    padding: 0 36px;
-    gap: 22px;
-  }
-  .ttodDesktopRefresh .brand {
-    display: inline-flex;
-    flex-wrap: nowrap;
-    align-items: baseline;
-    gap: 0;
-    white-space: nowrap;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 27px;
-    font-style: italic;
-    font-weight: 900;
-    letter-spacing: -1.5px;
-    line-height: 1;
-    color: var(--ttod-charcoal);
-  }
-  .ttodDesktopRefresh .brandTop,
-  .ttodDesktopRefresh .brandBottom {
-    display: inline;
-    margin: 0;
-    font-size: inherit;
-    line-height: inherit;
-    letter-spacing: inherit;
-  }
-  .ttodDesktopRefresh .brandBottom { color: var(--ttod-red); }
-  .ttodDesktopRefresh .nav .callLink:last-child {
-    background: var(--ttod-red);
-    border-color: var(--ttod-red);
-    color: #fff;
-    padding: 13px 20px;
-    box-shadow: 0 5px 16px rgba(201,16,34,.13);
-  }
-  .ttodDesktopRefresh .nav .callLink:last-child:hover { background:var(--ttod-red-dark); }
-  .ttodDesktopRefresh .hero {
-    max-width: 1440px;
-    margin: 30px auto 72px;
-    padding: 0 36px;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 660px);
-    gap: 32px;
-    align-items: stretch;
-  }
-  .ttodDesktopRefresh .heroCopy {
-    position: relative;
-    isolation: isolate;
-    min-width: 0;
-    min-height: 685px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    align-items: flex-start;
-    padding: 38px 35px 42px;
-    border-radius: 25px;
-    background: var(--ttod-charcoal);
-    color: #fff;
-    box-shadow: 0 14px 40px rgba(15,22,35,.12);
-  }
-  .ttodDesktopRefresh .heroFleet {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    border-radius: 0;
-    box-shadow: none;
-    z-index: -2;
-  }
-  .ttodDesktopRefresh .heroFleet img {
-    height: 100%;
-    width: 100%;
-    object-fit: cover;
-    object-position: 49% 50%;
-  }
-  .ttodDesktopRefresh .heroFleet:after { display: none; }
-  .ttodDesktopRefresh .heroCopy:after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: linear-gradient(180deg,rgba(9,15,24,.17) 0%,rgba(9,15,24,.55) 35%,rgba(9,15,24,.93) 100%);
-    pointer-events: none;
-  }
-  .ttodDesktopRefresh .hero .eyebrow {
-    color: #fff;
-    background: var(--ttod-red);
-    padding: 11px 15px;
-    font-size: 12px;
-    border-radius: 7px;
-    line-height: 1.4;
-    max-width: 100%;
-    letter-spacing: 1.2px;
-  }
-  .ttodDesktopRefresh .hero h1 {
-    color: #fff;
-    font-size: clamp(39px, 3.5vw, 57px);
-    line-height: 1.06;
-    letter-spacing: -2.2px;
-    margin: 20px 0 15px;
-    max-width: 640px;
-    text-wrap: balance;
-  }
-  .ttodDesktopRefresh .hero .lede {
-    color: #edf0f3;
-    font-size: 17px;
-    line-height: 1.6;
-    margin: 0;
-    max-width: 575px;
-  }
-  .ttodDesktopRefresh .hero .trustRow {
-    gap: 8px;
-    margin-top: 24px;
-    max-width: 100%;
-  }
-  .ttodDesktopRefresh .hero .trustRow span {
-    border: 1px solid rgba(255,255,255,.28);
-    background: rgba(18,25,34,.62);
-    color: #fff;
-    border-radius: 9px;
-    padding: 11px 10px;
-    font-size: 12px;
-  }
-  .ttodDesktopRefresh .hero .bookingCard {
-    width: 100%;
-    min-width: 0;
-    align-self: start;
-    padding: 36px 34px;
-    border: 1px solid #e1e4e9;
-    border-top: 4px solid var(--ttod-red);
-    border-radius: 25px;
-    box-shadow: 0 20px 55px rgba(24,32,45,.12);
-  }
-  .ttodDesktopRefresh .hero .stepTitle {
-    color: var(--ttod-charcoal);
-    font-size: 29px;
-    margin-top: 0;
-    margin-bottom: 23px;
-  }
-  .ttodDesktopRefresh .hero .primary {
-    background: var(--ttod-red);
-    font-size: 15px;
-    letter-spacing: .5px;
-    min-height: 55px;
-  }
-  .ttodDesktopRefresh .hero .primary:hover:not(:disabled) { background:var(--ttod-red-dark); }
-  .ttodDesktopRefresh .hero .bookButton { background: var(--ttod-charcoal); }
-  .ttodDesktopRefresh .hero input:focus,
-  .ttodDesktopRefresh .hero select:focus {
-    border-color: #cc3947;
-    box-shadow: 0 0 0 3px rgba(201,16,34,.13);
-  }
-  .ttodDesktopRefresh .hero .quoteBox {
-    border-color: #efcbcf;
-    background: #fff7f8;
-  }
-  .ttodDesktopRefresh .hero .quotePrice { color: var(--ttod-charcoal); }
-  .ttodDesktopRefresh .how {
-    max-width: 1368px;
-    border-color: #e9e9eb;
-  }
-  .ttodDesktopRefresh .how .sectionKicker { color: var(--ttod-red); }
-  .ttodDesktopRefresh .how .num { background: var(--ttod-red); }
+/* Desktop-only TTOD redesign — match approved scenic hero mockup.
+   Scoped under the homepage root; mobile, roadside, API and logic untouched. */
+.ttodDesktopNav,.ttodDesktopInfoStrip { display:none; }
+@media (min-width: 1100px) {
+ .ttodDesktopRefresh {
+   --ttod-red:#ce071b; --ttod-red-dark:#ac0717; --ttod-ink:#161b23;
+   background:#fff;
+ }
+ .ttodDesktopRefresh .nav {
+   max-width:1500px; height:90px; padding:0 30px; gap:16px;
+ }
+ .ttodDesktopRefresh .brand {
+   display:inline-flex; gap:0; flex-wrap:nowrap; white-space:nowrap;
+   align-items:baseline; font-size:26px; font-weight:900; font-style:italic;
+   letter-spacing:-1.55px; line-height:1; color:var(--ttod-ink);
+ }
+ .ttodDesktopRefresh .brandTop,.ttodDesktopRefresh .brandBottom {
+   display:inline; margin:0; font-size:inherit; letter-spacing:inherit; line-height:inherit;
+ }
+ .ttodDesktopRefresh .brandBottom {color:var(--ttod-red);}
+ .ttodDesktopRefresh .nav .siteMenu {display:none;}
+ .ttodDesktopRefresh .ttodDesktopNav {
+   display:flex; justify-content:center; align-items:center; gap:clamp(12px,2vw,31px);
+   margin:0 auto; padding-left:16px; white-space:nowrap;
+ }
+ .ttodDesktopRefresh .ttodDesktopNav a {
+   font-size:13px; font-weight:800; color:var(--ttod-ink); text-decoration:none;
+   border-bottom:3px solid transparent; padding:9px 0;
+ }
+ .ttodDesktopRefresh .ttodDesktopNav a:hover,
+ .ttodDesktopRefresh .ttodDesktopNav a[aria-current] {
+   color:var(--ttod-red); border-bottom-color:var(--ttod-red);
+ }
+ .ttodDesktopRefresh .nav .callLink {font-size:13px;}
+ .ttodDesktopRefresh .nav .callLink:last-child {
+   background:var(--ttod-red); color:#fff; border-color:var(--ttod-red);
+   border-radius:12px; padding:13px 19px;
+ }
+ .ttodDesktopRefresh .nav .callLink:last-child:hover {background:var(--ttod-red-dark);}
+ .ttodDesktopRefresh .hero {
+   max-width:1500px; margin:0 auto; padding:35px 30px 35px;
+   min-height:640px; border-radius:0; overflow:visible;
+   position:relative; isolation:isolate; display:grid;
+   grid-template-columns:minmax(0,1fr) minmax(0,575px);
+   align-items:start; gap:25px;
+   background-image:
+     linear-gradient(90deg,rgba(11,17,25,.90) 0%,rgba(11,17,25,.65) 24%,rgba(11,17,25,.08) 62%,rgba(11,17,25,.05) 100%),
+     url('/tow-truck-fleet.png');
+   background-size:cover; background-position:center 48%;
+   box-shadow:none;
+ }
+ .ttodDesktopRefresh .heroCopy {
+   min-width:0; min-height:0; display:flex; flex-direction:column;
+   align-items:flex-start; justify-content:flex-start; padding:4px 10px 30px 12px;
+   background:none; box-shadow:none; border-radius:0; color:#fff;
+ }
+ .ttodDesktopRefresh .heroFleet {display:none;}
+ .ttodDesktopRefresh .heroCopy::after {content:none;}
+ .ttodDesktopRefresh .hero .eyebrow {
+   max-width:100%; color:#fff; background:var(--ttod-red);
+   font-size:12px; font-weight:900; letter-spacing:.8px;
+   line-height:1.35; padding:12px 16px; border-radius:8px;
+ }
+ .ttodDesktopRefresh .hero h1 {
+   color:#fff; font-size:clamp(40px,3.4vw,55px);
+   line-height:1.06; letter-spacing:-2px; margin:22px 0 14px;
+   max-width:530px; text-wrap:balance;
+ }
+ .ttodDesktopRefresh .hero .lede {
+   color:#f5f5f5; font-size:17px; line-height:1.56;
+   max-width:500px; margin:0; text-shadow:0 1px 4px rgba(0,0,0,.22);
+ }
+ .ttodDesktopRefresh .hero .trustRow {
+   margin-top:32px; gap:8px; max-width:100%; align-items:flex-start;
+ }
+ .ttodDesktopRefresh .hero .trustRow span {
+   background:rgba(16,22,30,.70); border:1px solid rgba(255,255,255,.30);
+   color:#fff; border-radius:8px; font-size:12px; padding:10px 11px;
+ }
+ .ttodDesktopRefresh .hero .bookingCard {
+   align-self:start; min-width:0; width:100%; padding:24px 28px 20px;
+   background:#fff; border:1px solid #e6e8ed; border-top:4px solid var(--ttod-red);
+   border-radius:21px; box-shadow:0 16px 40px rgba(0,0,0,.20);
+ }
+ .ttodDesktopRefresh .hero .stepTitle {
+   color:var(--ttod-ink); font-size:25px; margin:0 0 15px; letter-spacing:-.7px;
+ }
+ .ttodDesktopRefresh .hero .bookingCard label {
+   margin:10px 0 5px; font-size:12px;
+ }
+ .ttodDesktopRefresh .hero .bookingCard input:not([type='checkbox']),
+ .ttodDesktopRefresh .hero .bookingCard select {
+   min-height:43px; padding:10px 12px; font-size:14px; border-radius:9px;
+ }
+ .ttodDesktopRefresh .hero .bookingCard .twoCol {gap:12px;}
+ .ttodDesktopRefresh .hero .bookingCard .primary {
+   min-height:49px; margin-top:16px; padding:12px;
+   background:var(--ttod-red); font-size:14px; border-radius:10px;
+ }
+ .ttodDesktopRefresh .hero .bookingCard .primary:hover:not(:disabled){background:var(--ttod-red-dark);}
+ .ttodDesktopRefresh .hero .bookingCard .bookButton {background:var(--ttod-ink);}
+ .ttodDesktopRefresh .hero .bookingCard .finePrint {margin-top:10px; line-height:1.4;}
+ .ttodDesktopRefresh .hero .bookingCard input:focus,
+ .ttodDesktopRefresh .hero .bookingCard select:focus {
+    border-color:#d54451; box-shadow:0 0 0 3px rgba(206,7,27,.13);
+ }
+ .ttodDesktopRefresh .hero .quoteBox {border-color:#efd3d7;background:#fff8f9;}
+ .ttodDesktopRefresh .hero .quotePrice {color:var(--ttod-ink);}
+ .ttodDesktopRefresh .ttodDesktopInfoStrip {
+   display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:0;
+   max-width:1500px; margin:0 auto 58px; padding:24px 30px;
+   border-bottom:1px solid #e9e9eb; background:#f7f8fa;
+ }
+ .ttodDesktopRefresh .ttodDesktopInfoStrip div {padding:4px 25px;border-right:1px solid #d9dce1;}
+ .ttodDesktopRefresh .ttodDesktopInfoStrip div:last-child {border:0;}
+ .ttodDesktopRefresh .ttodDesktopInfoStrip strong {
+   display:block; font-size:15px; color:#181d26; margin-bottom:6px;
+ }
+ .ttodDesktopRefresh .ttodDesktopInfoStrip span {
+   display:block; font-size:12px; line-height:1.5; color:#505d6e;
+ }
+ .ttodDesktopRefresh .how {max-width:1440px;border-color:#e6e8ee;}
+ .ttodDesktopRefresh .how .sectionKicker {color:var(--ttod-red);}
+ .ttodDesktopRefresh .how .num {background:var(--ttod-red);}
 }
-/* At smaller widths retain the original layouts, form sizes and navigation. */
+/* Compact desktop navigation at laptop widths; maintain mobile original below 1100px. */
+@media (min-width:1100px) and (max-width:1250px) {
+ .ttodDesktopRefresh .nav {padding:0 22px;gap:10px;}
+ .ttodDesktopRefresh .brand {font-size:23px;}
+ .ttodDesktopRefresh .ttodDesktopNav {gap:13px;padding-left:4px;}
+ .ttodDesktopRefresh .ttodDesktopNav a {font-size:12px;}
+ .ttodDesktopRefresh .hero {grid-template-columns:minmax(0,1fr) minmax(0,520px);padding:25px 22px;gap:18px;}
+ .ttodDesktopRefresh .hero .bookingCard {padding:22px;}
+}
