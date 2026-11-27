@@ -8,6 +8,7 @@ export default function SiteMenu({ locale = 'en' }) {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
       </summary>
       <nav aria-label={locale === 'es' ? 'Información' : 'Information'}>
+        <a href={locale === 'es' ? '/es/roadside-assistance' : '/roadside-assistance'}>{locale === 'es' ? 'Asistencia en carretera' : 'Roadside assistance'}<span aria-hidden="true">↗</span></a>
         {PAGE_SLUGS.map(slug => <a key={slug} href={sitePath(slug, locale)}>{pages[slug][locale].nav}<span aria-hidden="true">↗</span></a>)}
       </nav>
     </details>
