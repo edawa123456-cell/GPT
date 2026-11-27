@@ -308,7 +308,7 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid #14
  .ttodDesktopRefresh .hero .trustRow {
    margin-top:32px; gap:8px; max-width:100%; align-items:flex-start;
  }
- .ttodDesktopRefresh .hero .trustRow span {
+ .ttodDesktopRefresh .hero .trustRow > span {
    background:rgba(16,22,30,.70); border:1px solid rgba(255,255,255,.30);
    color:#fff; border-radius:8px; font-size:12px; padding:10px 11px;
  }
@@ -404,15 +404,15 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid #14
    margin-top:auto; display:flex; flex-wrap:nowrap; gap:0;
    max-width:100%; align-items:stretch;
  }
- .ttodDesktopRefresh .hero .trustRow span {
+ .ttodDesktopRefresh .hero .trustRow > span {
    min-width:0; max-width:180px; padding:0 20px;
    background:transparent; border:0; border-right:1px solid rgba(255,255,255,.60);
    border-radius:0; color:#fff; display:flex;
    flex-direction:column; justify-content:center; align-items:center; text-align:center;
    font-weight:800; line-height:1.35; font-size:13px;
  }
- .ttodDesktopRefresh .hero .trustRow span:first-child {padding-left:3px;}
- .ttodDesktopRefresh .hero .trustRow span:last-child {border-right:0;}
+ .ttodDesktopRefresh .hero .trustRow > span:first-child {padding-left:3px;}
+ .ttodDesktopRefresh .hero .trustRow > span:last-child {border-right:0;}
  .ttodDesktopRefresh .ttodTrustIcon {
    display:grid; place-items:center; width:44px; height:44px;
    margin-bottom:9px; background:#fff; color:var(--ttod-red);
@@ -467,6 +467,20 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid #14
  .ttodDesktopRefresh .hero h1 {font-size:43px;}
  .ttodDesktopRefresh .hero .lede {font-size:16px;}
  .ttodDesktopRefresh .ttodDesktopNav {gap:12px;}
- .ttodDesktopRefresh .hero .trustRow span {padding:0 10px;font-size:11px;}
+ .ttodDesktopRefresh .hero .trustRow > span {padding:0 10px;font-size:11px;}
  .ttodDesktopRefresh .ttodDesktopInfoStrip > div {padding:2px 13px;}
+}
+
+/* Trust labels are separate on desktop only; keep existing mobile labels. */
+.ttodDesktopRefresh .hero .trustRow > span > span {
+  display:inline; background:none; border:0; border-radius:0;
+  margin:0; padding:0; color:inherit; font:inherit; box-shadow:none;
+}
+.ttodDesktopRefresh .hero .trustRow .ttodTrustTextDesktop {display:none;}
+@media (min-width:1100px) {
+ .ttodDesktopRefresh .hero .trustRow .ttodTrustTextMobile {display:none;}
+ .ttodDesktopRefresh .hero .trustRow .ttodTrustTextDesktop {display:inline;}
+ .ttodDesktopRefresh .siteFooter .footerBrand span {color:#ce071b;}
+ .ttodDesktopRefresh .siteFooter .footerBrand {color:#161b23;}
+ .ttodDesktopRefresh .hero .bookingCard button[style*="#0759cc"] {color:#ce071b !important;}
 }
